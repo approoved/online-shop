@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use illuminate\Support\Str;
+use Illuminate\Support\Str;
 use App\Notifications\EmailVerification;
 use App\Http\Requests\CreateUserRequest;
 use Symfony\Component\HttpFoundation\Response;

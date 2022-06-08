@@ -11,5 +11,5 @@ abstract class BaseFormRequest extends FormRequest
         return true;
     }
 
-    abstract public function rules(): array;
+    abstract protected function rules(): array;
 }

@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 abstract class BaseUserRequest extends BaseFormRequest
 {
-    public function getRules(bool $isCreate): array
+    protected function getRules(bool $isCreate): array
     {
         $required = $isCreate ? 'required' : 'sometimes';
 
