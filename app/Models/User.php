@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -20,6 +21,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property Carbon|null email_verified_at
  * @property Carbon|null created_at
  * @property Carbon|null updated_at
+ * @property Role role
+ * @property int role_id
  */
 class User extends Authenticatable
 {
@@ -38,6 +41,7 @@ class User extends Authenticatable
         'email_verified_at',
         'token',
         'password',
+        'role_id',
     ];
 
     /**
@@ -55,4 +59,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
 }
