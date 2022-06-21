@@ -29,10 +29,12 @@ class EmailVerification extends Notification implements ShouldQueue
 
     public function toMail(mixed $notifiable): MailMessage
     {
+        $url = env('APP_URL') . '/users/me/verification?token=' . $this->user->token;
+
         return (new MailMessage)
                     ->greeting('Hello, ' . $this->user->first_name . " " . $this->user->last_name . "!")
                     ->line('Please verify your email by clicking the button below!')
-                    ->action('Verify Email', route('verify.email', [$this->user->token]))
+                    ->action('Verify Email', $url)
                     ->line('Thank you for using ' . env('APP_NAME') . "!");
     }
 
