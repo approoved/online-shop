@@ -8,24 +8,25 @@ use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Requests\UserVerificationRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 final class AuthController extends Controller
 {
-    public function verify(string $token): JsonResponse
+    public function verify(UserVerificationRequest $request): JsonResponse
     {
+        $data = $request->validated();
+
         /** @var User $user */
         $user = User::query()
-            ->where('token', $token)
+            ->where('token', '=', $data['token'])
             ->firstOrFail();
 
-        $data = array(
+        $user->update([
             'email_verified_at' => Carbon::now(),
-            'token' => null
-        );
-
-        $user->update($data);
+            'token' => null,
+        ]);
 
         return response()->json($user);
     }
@@ -36,7 +37,7 @@ final class AuthController extends Controller
 
         /** @var User $user */
         $user = User::query()
-            ->where('email', $data['email'])
+            ->where('email', '=', $data['email'])
             ->firstOrFail();
 
         if (! Hash::check($data['password'], $user->password)) {

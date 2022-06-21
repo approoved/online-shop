@@ -6,13 +6,13 @@ use App\Http\Controllers\AuthController;
 
 Route::post('/users', [UserController::class, 'store']);
 
-Route::controller(AuthController::class)->group(function () {
-    Route::post('/verify/{token}', 'verify')
-        ->name('verify.email');
-    Route::post('/login', 'login');
-});
+Route::controller(AuthController::class)
+    ->group(function () {
+        Route::patch('/users/me/verification', 'verify');
+        Route::post('/users/me/token', 'login');
+    });
 
-Route::middleware('auth:api')->group(function () {
-
-    Route::get('/logout', [AuthController::class, 'logout']);
-});
+Route::middleware('auth:api')
+    ->group(function () {
+        Route::delete('/users/me/token', [AuthController::class, 'logout']);
+    });

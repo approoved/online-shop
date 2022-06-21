@@ -13,7 +13,6 @@ return new class extends Migration
 
             $table->string('first_name');
             $table->string('last_name');
-            $table->string('phone')->nullable()->unique();
             $table->string('token')->nullable();
         });
     }
@@ -25,7 +24,6 @@ return new class extends Migration
 
             $table->dropColumn('first_name');
             $table->dropColumn('last_name');
-            $table->dropColumn('phone');
             $table->dropColumn('token');
         });
     }
