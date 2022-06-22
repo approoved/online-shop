@@ -212,4 +212,9 @@ return [
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 
+    'default_admin' => [
+        'email' => env('DEFAULT_ADMIN_EMAIL', 'admin@online-shop.test'),
+        'password' => env('DEFAULT_ADMIN_PASSWORD', 'admin'),
+    ],
+
 ];

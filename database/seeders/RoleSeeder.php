@@ -15,5 +15,7 @@ class RoleSeeder extends Seeder
                 'name' => $role->value(),
             ]);
         }
+
+        $this->call(DefaultAdminUserSeeder::class);
     }
 }
