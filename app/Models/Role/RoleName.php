@@ -10,5 +10,5 @@ enum RoleName
 
     case customer;
     case manager;
-    case administrator;
+    case admin;
 }
