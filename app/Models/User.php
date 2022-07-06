@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Role\RoleName;
 use Carbon\Carbon;
 use App\Models\Role\Role;
 use Laravel\Passport\HasApiTokens;
@@ -62,5 +63,10 @@ class User extends Authenticatable
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function hasRole(RoleName $role): bool
+    {
+        return $this->role->name === $role->value();
     }
 }
