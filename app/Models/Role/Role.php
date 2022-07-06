@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property string name
  * @property Carbon created_at
  * @property Carbon updated_at
- * @property Collection|iterable <int, User> users
+ * @property Collection|iterable<int, User> users
  */
 class Role extends Model
 {

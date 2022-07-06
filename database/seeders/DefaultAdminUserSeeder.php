@@ -12,15 +12,15 @@ class DefaultAdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        /** @var Role $adminRole */
-        $adminRole = Role::query()
-            ->firstWhere('name', '=', RoleName::admin->value());
-
         /** @var User $admin */
         $admin = User::query()
             ->firstWhere('email', '=', config('app.default_admin.email'));
 
         if (! $admin) {
+            /** @var Role $adminRole */
+            $adminRole = Role::query()
+                ->firstWhere('name', '=', RoleName::admin->value());
+
             User::query()->create([
                 'first_name' => 'Admin',
                 'last_name' => 'Admin',
