@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\GetRoleListController;
 
 Route::post('/users', [UserController::class, 'store']);
 
@@ -16,6 +17,8 @@ Route::controller(AuthController::class)
 Route::middleware('auth:api')
     ->group(function () {
         Route::delete('/users/me/token', [AuthController::class, 'logout']);
+
+        Route::get('/roles', GetRoleListController::class);
 
         Route::controller(CategoryController::class)
             ->group( function () {
