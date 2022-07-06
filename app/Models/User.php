@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Role\RoleName;
 use Carbon\Carbon;
 use App\Models\Role\Role;
+use App\Models\Role\RoleName;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
