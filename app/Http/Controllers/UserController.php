@@ -46,7 +46,7 @@ final class UserController extends Controller
      */
     public function index(): JsonResponse
     {
-        $this->authorize(UserPolicy::INDEX, User::class);
+        $this->authorize(UserPolicy::VIEW_ANY, User::class);
 
         $users = QueryBuilder::for(User::class)
             ->allowedFilters(['role.name', 'email'])
@@ -61,7 +61,7 @@ final class UserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
-        $this->authorize(UserPolicy::SHOW, $user);
+        $this->authorize(UserPolicy::VIEW, $user);
 
         return response()->json($user);
     }
@@ -122,7 +122,7 @@ final class UserController extends Controller
      */
     public function destroy(User $user): Response
     {
-        $this->authorize(UserPolicy::DESTROY, $user);
+        $this->authorize(UserPolicy::DELETE, $user);
 
         if ($user->hasRole(RoleName::customer)) {
             $user->delete();

@@ -11,16 +11,16 @@ class UserPolicy
 {
     use HandlesAuthorization;
 
-    public const INDEX = 'index';
-    public const SHOW = 'show';
+    public const VIEW_ANY = 'viewAny';
+    public const VIEW = 'view';
     public const UPDATE = 'update';
     public const UPDATE_ROLE = 'updateRole';
-    public const DESTROY = 'destroy';
+    public const DELETE = 'delete';
 
     /**
      * @param Authenticatable&User $user
      */
-    public function index(Authenticatable $user): bool
+    public function viewAny(Authenticatable $user): bool
     {
         return $user->hasRole(RoleName::admin, RoleName::manager);
     }
@@ -28,7 +28,7 @@ class UserPolicy
     /**
      * @param Authenticatable&User $authUser
      */
-    public function show(Authenticatable $authUser, User $user): bool
+    public function view(Authenticatable $authUser, User $user): bool
     {
         return $authUser->id === $user->id ||
             $authUser->hasRole(RoleName::admin, RoleName::manager);
@@ -54,7 +54,7 @@ class UserPolicy
     /**
      * @param Authenticatable&User $authUser
      */
-    public function destroy(Authenticatable $authUser, User $user): bool
+    public function delete(Authenticatable $authUser, User $user): bool
     {
         return $authUser->id === $user->id;
     }
