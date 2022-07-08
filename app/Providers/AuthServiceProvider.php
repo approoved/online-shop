@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Models\Role\Role;
+use App\Policies\RolePolicy;
 use App\Policies\UserPolicy;
 use Laravel\Passport\Passport;
 use App\Policies\CategoryPolicy;
@@ -17,6 +19,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Category::class => CategoryPolicy::class,
         User::class => UserPolicy::class,
+        Role::class => RolePolicy::class,
     ];
 
     public function boot(): void
