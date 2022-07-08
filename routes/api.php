@@ -20,11 +20,19 @@ Route::middleware('auth:api')
 
         Route::get('/roles', GetRoleListController::class);
 
+        Route::controller(UserController::class)
+            ->group(function () {
+                Route::get('/users', 'index');
+                Route::get('/users/{user}', 'show');
+                Route::patch('/users/{user}', 'update');
+                Route::delete('/users/{user}', 'destroy');
+            });
+
         Route::controller(CategoryController::class)
             ->group( function () {
-                Route::post('/categories/{parent?}', 'store');
                 Route::get('/categories', 'index');
                 Route::get('/categories/{category}', 'show');
+                Route::post('/categories/{parent?}', 'store');
                 Route::patch('/categories/{category}', 'update');
                 Route::delete('/categories/{category}', 'destroy');
             });

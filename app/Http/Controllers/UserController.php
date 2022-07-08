@@ -5,11 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Role\Role;
 use Illuminate\Support\Str;
+use App\Policies\UserPolicy;
 use App\Models\Role\RoleName;
+use Illuminate\Support\Facades\Hash;
+use Spatie\QueryBuilder\QueryBuilder;
 use App\Http\Requests\CreateUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Notifications\EmailVerification;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Auth\Access\AuthorizationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 final class UserController extends Controller
 {
@@ -32,5 +39,100 @@ final class UserController extends Controller
         $user->notify($notification);
 
         return response()->json($user, Response::HTTP_CREATED);
+    }
+
+    /**
+     * @throws AuthorizationException
+     */
+    public function index(): JsonResponse
+    {
+        $this->authorize(UserPolicy::INDEX, User::class);
+
+        $users = QueryBuilder::for(User::class)
+            ->allowedFilters(['role.name', 'email'])
+            ->allowedIncludes('role')
+            ->paginate(50);
+
+        return response()->json($users);
+    }
+
+    /**
+     * @throws AuthorizationException
+     */
+    public function show(User $user): JsonResponse
+    {
+        $this->authorize(UserPolicy::SHOW, $user);
+
+        return response()->json($user);
+    }
+
+    /**
+     * @throws AuthorizationException
+     */
+    public function update(UpdateUserRequest $request, User $user): JsonResponse
+    {
+        $data = $request->validated();
+//
+        if (isset($data['role'])) {
+            $this->authorize(UserPolicy::UPDATE_ROLE, $user);
+
+            /** @var Role $role */
+            $role = Role::query()
+                ->where('name', '=', RoleName::get($data['role'])->value())
+                ->firstOrFail();
+
+            $user->role_id = $role->id;
+            $user->save();
+
+            return response()->json($user->load('role'));
+        }
+
+        $this->authorize(UserPolicy::UPDATE, $user);
+
+        if (isset($data['email'])) {
+            $data['email_verified_at'] = null;
+            $data['token'] = Str::random(72);
+        }
+
+        if (isset($data['new_password'])) {
+            if (! (isset($data['password']) &&
+                Hash::check($data['password'], $user->password))) {
+                    throw new HttpException(
+                        Response::HTTP_NOT_FOUND,
+                        'Invalid current password'
+                    );
+            }
+
+            $data['password'] = bcrypt($data['new_password']);
+        }
+
+        $user->update($data);
+
+        if (isset($data['email'])) {
+            $notification = new EmailVerification($user);
+            $user->notify($notification);
+        }
+
+        return response()->json($user);
+    }
+
+    /**
+     * @param Authenticatable&User $user
+     * @throws AuthorizationException
+     */
+    public function destroy(User $user): Response
+    {
+        $this->authorize(UserPolicy::DESTROY, $user);
+
+        if ($user->hasRole(RoleName::customer)) {
+            $user->delete();
+
+            return response()->noContent();
+        }
+
+        throw new HttpException(
+            Response::HTTP_CONFLICT,
+            'Unable to delete profile with ' . $user->role->name . ' role'
+        );
     }
 }

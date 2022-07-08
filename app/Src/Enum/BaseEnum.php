@@ -2,7 +2,8 @@
 
 namespace App\Src\Enum;
 
-use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 trait BaseEnum
 {
@@ -11,6 +12,9 @@ trait BaseEnum
         return $this->value ?? $this->name;
     }
 
+    /**
+     * @throws HttpException
+     */
     public static function get(string|int $value): static
     {
         foreach (self::cases() as $case) {
@@ -19,7 +23,8 @@ trait BaseEnum
             }
         }
 
-        throw new InvalidArgumentException(
+        throw new HttpException(
+            Response::HTTP_NOT_FOUND,
             'Value ' . $value . ' not found in ' . self::class
         );
     }
