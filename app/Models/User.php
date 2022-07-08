@@ -65,8 +65,14 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
-    public function hasRole(RoleName $role): bool
+    public function hasRole(RoleName ...$roles): bool
     {
-        return $this->role->name === $role->value();
+        $var = [];
+
+        foreach ($roles as $role) {
+            $var[] = $role->value();
+        }
+
+        return in_array($this->role->name, $var);
     }
 }

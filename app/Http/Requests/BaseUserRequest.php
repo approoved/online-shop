@@ -11,18 +11,28 @@ abstract class BaseUserRequest extends BaseFormRequest
         return [
             'first_name' => [
                 $required,
+                'string',
             ],
             'last_name' => [
                 $required,
+                'string',
             ],
             'email' => [
                 $required,
                 'email',
-                'unique:users,email'
+                'unique:users,email',
             ],
             'password' => [
                 $required,
-                'min:9'
+                'min:9',
+            ],
+            'new_password' => [
+                'sometimes',
+                'min:9',
+            ],
+            'role' => [
+              'sometimes',
+              'string',
             ],
         ];
     }
