@@ -19,7 +19,7 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request, Category $parent = null): JsonResponse
     {
-        $this->authorize(CategoryPolicy::STORE, Category::class);
+        $this->authorize(CategoryPolicy::CREATE, Category::class);
 
         $data = $request->validated();
 
@@ -82,7 +82,7 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category): Response
     {
-        $this->authorize(CategoryPolicy::DESTROY, Category::class);
+        $this->authorize(CategoryPolicy::DELETE, Category::class);
 
         if ($category->hasDescendants()) {
             throw new HttpException(
