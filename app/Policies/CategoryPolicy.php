@@ -12,41 +12,31 @@ class CategoryPolicy
 {
     use HandlesAuthorization;
 
-    public const STORE = 'store';
+    public const CREATE = 'create';
     public const UPDATE = 'update';
-    public const DESTROY = 'destroy';
+    public const DELETE = 'delete';
 
     /**
      * @param Authenticatable&User $user
      */
-    public function store(Authenticatable $user): bool
+    public function create(Authenticatable $user): bool
     {
-        return $this->manage($user);
+        return $user->hasRole(RoleName::admin, RoleName::manager);
     }
 
+    /**
+     * @param Authenticatable&User $user
+     */
     public function update(Authenticatable $user): bool
     {
-        return $this->manage($user);
-    }
-
-    public function destroy(Authenticatable $user): bool
-    {
-        return $this->manage($user);
+        return $user->hasRole(RoleName::admin, RoleName::manager);
     }
 
     /**
      * @param Authenticatable&User $user
      */
-    private function manage(Authenticatable $user): bool
+    public function delete(Authenticatable $user): bool
     {
-        /** @var Role $admin */
-        $admin = Role::query()
-            ->firstWhere('name', '=', RoleName::admin->value());
-
-        /** @var Role $manager */
-        $manager = Role::query()
-            ->firstWhere('name', '=', RoleName::manager->value());
-
-        return $user->role_id === $manager->id || $user->role_id === $admin->id;
+        return $user->hasRole(RoleName::admin, RoleName::manager);
     }
 }
