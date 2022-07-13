@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use App\Models\Category\Category;
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

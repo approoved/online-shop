@@ -70,7 +70,7 @@ class ProductController extends Controller
         return response()->json($product, Response::HTTP_CREATED);
     }
 
-    public function show(RetrieveProductRequest $request,Product $product): JsonResponse
+    public function show(RetrieveProductRequest $request, Product $product): JsonResponse
     {
         $data = $request->validated();
 
