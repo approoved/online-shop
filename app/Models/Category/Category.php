@@ -2,13 +2,13 @@
 
 namespace App\Models\Category;
 
-use App\Models\Product;
 use Carbon\Carbon;
+use App\Models\Product;
 use Franzose\ClosureTable\Models\Entity;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Franzose\ClosureTable\Extensions\Collection as FranzoseCollection;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int id
