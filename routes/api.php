@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GetRoleListController;
 
@@ -35,6 +36,15 @@ Route::middleware('auth:api')
                 Route::post('/categories/{parent?}', 'store');
                 Route::patch('/categories/{category}', 'update');
                 Route::delete('/categories/{category}', 'destroy');
+            });
+
+        Route::controller(ProductController::class)
+            ->group(function () {
+                Route::get('/products', 'index');
+                Route::post('/products', 'store');
+                Route::get('/products/{product}', 'show');
+                Route::patch('/products/{product}', 'update');
+                Route::delete('/products/{product}', 'destroy');
             });
     });
 
