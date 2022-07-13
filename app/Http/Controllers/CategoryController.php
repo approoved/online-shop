@@ -91,6 +91,13 @@ class CategoryController extends Controller
             );
         }
 
+        if ($category->hasProducts()) {
+            throw new HttpException(
+                Response::HTTP_CONFLICT,
+                'Unable to delete category having products.'
+            );
+        }
+
         $category->delete();
 
         return response()->noContent();
