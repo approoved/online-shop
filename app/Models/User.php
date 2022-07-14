@@ -67,12 +67,12 @@ class User extends Authenticatable
 
     public function hasRole(RoleName ...$roles): bool
     {
-        $var = [];
+        $roleNames = [];
 
         foreach ($roles as $role) {
-            $var[] = $role->value();
+            $roleNames[] = $role->value();
         }
 
-        return in_array($this->role->name, $var);
+        return in_array($this->role->name, $roleNames);
     }
 }
