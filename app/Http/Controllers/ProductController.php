@@ -2,51 +2,82 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
+use App\Models\Product\Product;
 use App\Policies\ProductPolicy;
 use App\Models\Category\Category;
+use App\Models\ProductFilter\ProductFilter;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Services\Elasticsearch\Elasticsearch;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Requests\Product\CreateProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 use App\Http\Requests\Product\RetrieveProductRequest;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Elastic\Elasticsearch\Exception\ClientResponseException;
+use Elastic\Elasticsearch\Exception\ServerResponseException;
 
 class ProductController extends Controller
 {
+    /**
+     * @throws ServerResponseException
+     * @throws ClientResponseException
+     */
     public function index(RetrieveProductRequest $request): JsonResponse
     {
         $data = $request->validated();
+        $filters = [];
 
-        if (isset($data['category'])) {
+        if (isset($data['category_id'])) {
             /** @var Category $category */
-            $category = Category::query()
-                ->where('name', '=', $data['category'])
-                ->firstOrFail();
+            $category = Category::query()->find($data['category_id']);
 
-            if (! $category->hasDescendants()) {
-                return response()->json($category->products()->paginate(30));
+            if ($category->hasDescendants()) {
+                if (isset($data['filter'])) {
+                    throw new HttpException(
+                        Response::HTTP_CONFLICT,
+                        'Unable to apply filters to parent category.'
+                    );
+                }
+
+                $descendantsWithSelf = $category->descendantsWithSelf()->get();
+
+                /** @var Category $descendant */
+                foreach ($descendantsWithSelf as $descendant) {
+                    $categoriesIds[] = $descendant->id;
+                }
             }
 
-            $categories = $category->descendantsWithSelf()->get();
+            $filters[] = ['terms' => ['category_id' => $categoriesIds ?? [$category->id]]];
 
-            $categoriesIDs = [];
+            if (isset($data['filter'])) {
+                foreach ($data['filter'] as $filterId => $query) {
+                    $data['filter'][$filterId] = explode(',', $query);
+                }
 
-            foreach ($categories as $category) {
-                $categoriesIDs[] = $category->id;
+                foreach ($data['filter'] as $filterId => $query) {
+                    /** @var ProductFilter $filter */
+                    $filter = $category->filters()->find($filterId);
+
+                    if (! $filter) {
+                        throw new HttpException(
+                            Response::HTTP_CONFLICT,
+                            'Filter with id ' . $filterId . ' not found in category ' . $category->name
+                        );
+                    }
+
+                    $filters[] = $filter->apply($query);
+                }
             }
-
-            $products = Product::query()
-                ->whereIn('category_id', $categoriesIDs)
-                ->paginate(30);
-
-            return response()->json($products);
         }
 
-        $products = Product::query()->paginate(30);
-
-
-        return response()->json($products);
+        return response()->json(Elasticsearch::getInstance()->search(
+            index: Product::ELASTIC_INDEX,
+            query: $data['query'] ?? null,
+            filters: $filters ?? null,
+            perPage: $data['per_page'] ?? null,
+            page: $data['page'] ?? null
+        ));
     }
 
     /**
@@ -74,10 +105,8 @@ class ProductController extends Controller
     {
         $data = $request->validated();
 
-        if (isset($data['include'])) {
-            if (strtolower($data['include']) === 'category') {
-                $product->load('category');
-            }
+        if (isset($data['include']) && $data['include'] === 'category') {
+            $product->load('category');
         }
 
         return response()->json($product);
