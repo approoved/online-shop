@@ -5,9 +5,12 @@ namespace App\Models\Category;
 use Carbon\Carbon;
 use App\Models\Product\Product;
 use Franzose\ClosureTable\Models\Entity;
+use App\Models\ProductField\ProductField;
 use App\Models\ProductFilter\ProductFilter;
 use Illuminate\Database\Eloquent\Collection;
+use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Franzose\ClosureTable\Extensions\Collection as FranzoseCollection;
 
@@ -24,10 +27,12 @@ use Franzose\ClosureTable\Extensions\Collection as FranzoseCollection;
  * @property Category|null parent
  * @property Collection|null products
  * @property Collection<int, ProductFilter>|null filters
+ * @property Collection<int, ProductField>|null fields
  */
 class Category extends Entity
 {
     use HasFactory;
+    use HasRelationships;
 
     /**
      * @var bool
@@ -65,6 +70,24 @@ class Category extends Entity
     public function filters(): HasMany
     {
         return $this->hasMany(ProductFilter::class, 'category_id', 'id');
+    }
+
+    public function fields(): HasManyDeep
+    {
+        return $this->hasManyDeep(
+            ProductField::class,
+            [Product::class, 'field_product'],
+            [
+                'category_id',
+                'product_id',
+                'id'
+            ],
+            [
+                'id',
+                'id',
+                'product_field_id'
+            ]
+        );
     }
 
     public function hasProducts(): bool

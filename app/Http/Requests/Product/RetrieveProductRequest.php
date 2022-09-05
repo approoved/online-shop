@@ -3,14 +3,14 @@
 namespace App\Http\Requests\Product;
 
 use App\Http\Requests\BaseFormRequest;
-use App\Http\Services\Elasticsearch\Elasticsearch;
+use App\Http\Controllers\ProductController;
 
 class RetrieveProductRequest extends BaseFormRequest
 {
     public function rules(): array
     {
         return [
-            'include' => ['sometimes', 'string'],
+            'append' => ['sometimes', 'string'],
             'query' => ['sometimes', 'string'],
             'category_id' => [
                 'sometimes',
@@ -26,7 +26,7 @@ class RetrieveProductRequest extends BaseFormRequest
                 'integer',
                 'numeric',
                 'min:1',
-                'max:' . Elasticsearch::MAX_PER_PAGE,
+                'max:' . ProductController::getMaxPerPage(),
             ],
             'page' => ['sometimes', 'integer', 'numeric', 'min:1'],
         ];

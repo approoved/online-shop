@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Src\Enum;
+namespace App\Services\Enum;
 
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;

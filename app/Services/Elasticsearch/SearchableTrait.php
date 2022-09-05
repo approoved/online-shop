@@ -1,8 +1,6 @@
 <?php
 
-namespace App\Http\Services\Elasticsearch;
-
-use App\Observers\ElasticsearchObserver;
+namespace App\Services\Elasticsearch;
 
 trait SearchableTrait
 {

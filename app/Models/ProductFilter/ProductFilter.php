@@ -6,8 +6,8 @@ use Carbon\Carbon;
 use App\Models\Category\Category;
 use Ramsey\Collection\Collection;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\Elasticsearch\Elasticsearch;
 use Symfony\Component\HttpFoundation\Response;
-use App\Http\Services\Elasticsearch\Elasticsearch;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -73,7 +73,7 @@ final class ProductFilter extends Model
                 $data['product_filter_type_id'] ?? $this->product_filter_type_id
             );
 
-            if (isset($data['product_filter_type_id']) && ! $productFilterType) {
+            if (! $productFilterType) {
                 throw new HttpException(
                     Response::HTTP_NOT_FOUND,
                     'Filter type not found.'
@@ -91,7 +91,7 @@ final class ProductFilter extends Model
             }
 
             if (isset($data['field'])) {
-                if (! in_array($data['field'], Elasticsearch::getInstance()->getFields($category))) {
+                if (! in_array($data['field'], Elasticsearch::getInstance()->getFields('products', ['category_id' => $category->id]))) {
                     throw new HttpException(
                         Response::HTTP_CONFLICT,
                         'Field ' . $data['field'] .  ' does not exist in category ' . $category->name

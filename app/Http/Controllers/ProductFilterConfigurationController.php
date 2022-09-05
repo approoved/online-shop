@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProductFilter\GetFieldListRequest;
-use App\Http\Requests\ProductFilter\GetFilterTypeListRequest;
-use App\Http\Services\Elasticsearch\Elasticsearch;
-use App\Models\Category\Category;
-use App\Models\ProductFilter\ProductFilter;
-use App\Models\ProductFilter\ProductFilterType;
-use App\Models\Role\RoleName;
 use App\Models\User;
+use App\Models\Role\RoleName;
+use App\Models\Product\Product;
+use App\Models\Category\Category;
+use Illuminate\Support\Facades\Gate;
+use App\Models\ProductFilter\ProductFilter;
+use App\Services\Elasticsearch\Elasticsearch;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Http\Requests\ProductFilter\GetFieldListRequest;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
-use Illuminate\Support\Facades\Gate;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Http\Requests\ProductFilter\GetFilterTypeListRequest;
 
 class ProductFilterConfigurationController extends Controller
 {
@@ -34,7 +34,7 @@ class ProductFilterConfigurationController extends Controller
 
         $data = $request->validated();
 
-        $filterFields = $this->elasticsearch->getFields($category);
+        $filterFields = $this->elasticsearch->getFields(Product::ELASTIC_INDEX, ['category_id' => $category->id]);
 
         //TODO delete exclude
 

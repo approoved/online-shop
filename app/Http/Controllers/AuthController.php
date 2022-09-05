@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\User;
-use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Symfony\Component\HttpFoundation\Response;
-use App\Http\Requests\UserVerificationRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Http\Requests\Auth\UserVerificationRequest;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 final class AuthController extends Controller

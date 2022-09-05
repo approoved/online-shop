@@ -2,7 +2,7 @@
 
 namespace App\Models\ProductFilter;
 
-use App\Src\Enum\BaseEnum;
+use App\Services\Enum\BaseEnum;
 
 enum ProductFilterTypeName
 {

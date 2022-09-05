@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Rules;
+namespace App\Http\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
-class ArrayWithStringIndices implements Rule
+class ArrayWithIntegerIndices implements Rule
 {
     /**
      * @param  string  $attribute
@@ -17,7 +17,7 @@ class ArrayWithStringIndices implements Rule
         }
 
         foreach ($value as $key => $val) {
-            if (is_int($key)) {
+            if (! is_int($key)) {
                 return false;
             }
         }
@@ -27,6 +27,6 @@ class ArrayWithStringIndices implements Rule
 
     public function message(): string
     {
-        return 'The :attribute must be an array with string indices';
+        return 'The :attribute must be an array with product fields ids indices';
     }
 }

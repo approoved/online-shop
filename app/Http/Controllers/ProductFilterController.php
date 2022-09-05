@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category\Category;
-use App\Models\ProductFilter\ProductFilterTypeName;
 use App\Policies\ProductFilterPolicy;
 use App\Models\ProductFilter\ProductFilter;
+use App\Services\Elasticsearch\Elasticsearch;
 use Symfony\Component\HttpFoundation\Response;
-use App\Http\Services\Elasticsearch\Elasticsearch;
 use Illuminate\Auth\Access\AuthorizationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Models\ProductFilter\ProductFilterTypeName;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;

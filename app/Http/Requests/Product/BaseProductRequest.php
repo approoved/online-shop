@@ -2,9 +2,8 @@
 
 namespace App\Http\Requests\Product;
 
-use App\Rules\Uppercase;
-use App\Rules\ArrayWithStringIndices;
 use App\Http\Requests\BaseFormRequest;
+use App\Http\Rules\ArrayWithIntegerIndices;
 
 abstract class BaseProductRequest extends BaseFormRequest
 {
@@ -16,14 +15,9 @@ abstract class BaseProductRequest extends BaseFormRequest
             'sku' => [
                 $required,
                 'string',
-                new Uppercase(),
                 'unique:products,sku',
             ],
             'name' => [
-                $required,
-                'string',
-            ],
-            'category' => [
                 $required,
                 'string',
             ],
@@ -38,7 +32,7 @@ abstract class BaseProductRequest extends BaseFormRequest
             ],
             'details' => [
                 'sometimes',
-                new ArrayWithStringIndices(),
+                new ArrayWithIntegerIndices(),
             ],
         ];
     }

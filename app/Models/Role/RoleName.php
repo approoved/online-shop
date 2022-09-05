@@ -2,7 +2,7 @@
 
 namespace App\Models\Role;
 
-use App\Src\Enum\BaseEnum;
+use App\Services\Enum\BaseEnum;
 
 enum RoleName
 {

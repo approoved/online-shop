@@ -1,11 +1,9 @@
 <?php
 
-namespace App\Observers;
+namespace App\Services\Elasticsearch;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use App\Http\Services\Elasticsearch\Searchable;
-use App\Http\Services\Elasticsearch\Elasticsearch;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Elastic\Elasticsearch\Exception\MissingParameterException;

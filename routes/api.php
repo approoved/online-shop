@@ -6,7 +6,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GetRoleListController;
+use App\Http\Controllers\ProductFieldController;
 use App\Http\Controllers\ProductFilterController;
+use App\Http\Controllers\ProductFieldGroupController;
 use App\Http\Controllers\ProductFilterValueController;
 use App\Http\Controllers\ProductFilterConfigurationController;
 
@@ -41,11 +43,27 @@ Route::middleware('auth:api')
                 Route::delete('/categories/{category}', 'destroy');
             });
 
+        Route::controller(ProductFieldGroupController::class)
+            ->group(function () {
+                Route::post('/product-field-groups', 'store');
+                Route::get('/product-field-groups', 'index');
+                Route::get('/product-field-groups/{groupId}', 'show');
+                Route::delete('/product-field-groups/{group}', 'destroy');
+            });
+
+        Route::controller(ProductFieldController::class)
+            ->group(function () {
+                Route::post('/product-field-groups/{group}/product-fields', 'store');
+                Route::get('/product-fields', 'index');
+                Route::get('/product-fields/{fieldId}', 'show');
+                Route::delete('/product-fields/{field}', 'destroy');
+            });
+
         Route::controller(ProductController::class)
             ->group(function () {
                 Route::get('/products', 'index');
-                Route::post('/products', 'store');
-                Route::get('/products/{product}', 'show');
+                Route::post('/categories/{category}/products', 'store');
+                Route::get('/products/{productId}', 'show');
                 Route::patch('/products/{product}', 'update');
                 Route::delete('/products/{product}', 'destroy');
             });

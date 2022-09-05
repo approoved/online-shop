@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Services\Elasticsearch;
+namespace App\Services\Elasticsearch;
 
 interface Searchable
 {
