@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Spatie\QueryBuilder\QueryBuilder;
 use App\Policies\ProductFieldGroupPolicy;
+use App\Exceptions\InvalidInputDataException;
 use Symfony\Component\HttpFoundation\Response;
-use App\Models\ProductField\ProductFieldGroup;
 use Illuminate\Auth\Access\AuthorizationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Models\ProductFieldGroup\ProductFieldGroup;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Http\Requests\ProductFieldGroup\CreateProductFieldGroupRequest;
 
@@ -26,23 +26,34 @@ final class ProductFieldGroupController extends Controller
         $data = $request->validated();
 
         $group = new ProductFieldGroup();
-        $group->fill($data)->save();
 
-        return response()->json($group, Response::HTTP_CREATED);
+        try {
+            $group->fill($data)->save();
+        } catch (InvalidInputDataException$exception) {
+            throw new HttpException(
+                Response::HTTP_CONFLICT,
+                $exception->getMessage()
+            );
+        }
+
+        return response()->json(
+            $this->transform($group),
+            Response::HTTP_CREATED
+        );
     }
 
     public function index(): JsonResponse
     {
-        $groups = ProductFieldGroup::getSearchQuery()->get();
+        $groups = ProductFieldGroup::getSearchQuery()->paginate();
 
         return response()->json($this->transform($groups));
     }
 
-    public function show(ProductFieldGroup $groupId): JsonResponse
+    public function show(int $groupId): JsonResponse
     {
         $group = ProductFieldGroup::getSearchQuery()
             ->where('id', $groupId)
-            ->first();
+            ->firstOrFail();
 
         return response()->json($this->transform($group));
     }
@@ -57,7 +68,7 @@ final class ProductFieldGroupController extends Controller
         if ($group->hasProducts()) {
             throw new HttpException(
                 Response::HTTP_CONFLICT,
-                'Unable to delete product field group with products.'
+                'Unable to delete product field group with products. Delete products first.'
             );
         }
 

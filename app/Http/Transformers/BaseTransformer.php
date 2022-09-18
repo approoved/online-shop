@@ -3,10 +3,11 @@
 namespace App\Http\Transformers;
 
 use Exception;
+use RuntimeException;
 use League\Fractal\Scope;
-use http\Exception\RuntimeException;
 use Illuminate\Database\Eloquent\Model;
 use League\Fractal\TransformerAbstract;
+use Illuminate\Database\Eloquent\Collection;
 use League\Fractal\Resource\ResourceInterface;
 
 abstract class BaseTransformer extends TransformerAbstract
@@ -23,15 +24,17 @@ abstract class BaseTransformer extends TransformerAbstract
 
         if ($modelClass === false) {
             throw new RuntimeException(
-                'Model is not configured for transformer. Class - %s.',
+                sprintf(
+                    'Model is not configured for transformer. Class - %s.',
                 static::class
+                )
             );
         }
 
         $availableIncludes = [];
 
         foreach (get_class_vars($modelClass)['allowedIncludes'] as $include) {
-            if (! in_array(strtok($include, '.'), $availableIncludes)) {
+            if (!in_array(strtok($include, '.'), $availableIncludes)) {
                 $availableIncludes[] = strtok($include, '.');
             }
         }
@@ -39,6 +42,8 @@ abstract class BaseTransformer extends TransformerAbstract
         $this->availableIncludes = $availableIncludes;
         $this->appends = explode(',', $appends) ?? [];
     }
+
+    abstract public function transform(Model $model):  array;
 
     /**
      * @param Scope $scope
@@ -67,23 +72,34 @@ abstract class BaseTransformer extends TransformerAbstract
             return parent::callIncludeMethod($scope, $includeName, $data);
         }
 
+        $model = $data;
+        $include = $model->$includeName;
+        $includeObject = $include instanceof Collection
+            ? $include->get(0)
+            : $include;
+
+        return $model->$includeName instanceof Collection
+            ? $this->collection($data->$includeName, $this->getIncludeObjectTransformer($includeObject))
+            : $this->item($data->$includeName, $this->getIncludeObjectTransformer($includeObject));
+    }
+
+    private function getIncludeObjectTransformer(Model|null $includeObject): TransformerAbstract
+    {
+        if ($includeObject === null) {
+            return new NullTransformer();
+        }
+
         $config = config('transformer');
 
-        $includeClass = is_subclass_of($data->$includeName, Model::class)
-            ? get_class($data->$includeName)
-            : get_class($data->$includeName->get(0));
+        $includeClass = get_class($includeObject);
 
         if (! array_key_exists($includeClass, $config)) {
             throw new RuntimeException(
-                'Transformer class is not configured for model. Class - %s.',
-                $includeClass
+                sprintf('Transformer class is not configured for model. Class - %s.',
+                $includeClass)
             );
         }
 
-        $transformerClass = $config[$includeClass];
-
-        return is_subclass_of($data->$includeName, Model::class)
-            ? $this->item($data->$includeName, new $transformerClass)
-            : $this->collection($data->$includeName, new $transformerClass);
+        return new $config[$includeClass];
     }
 }

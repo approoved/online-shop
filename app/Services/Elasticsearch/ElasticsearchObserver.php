@@ -4,46 +4,23 @@ namespace App\Services\Elasticsearch;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
-use Elastic\Elasticsearch\Exception\MissingParameterException;
+use App\Services\Elasticsearch\Repositories\SearchRepository;
+use App\Services\Elasticsearch\Repositories\RepositoryFactory;
 
 class ElasticsearchObserver implements ShouldQueue
 {
-    private Elasticsearch $elasticsearch;
-
-    public function __construct()
+    public function saved(Model&Searchable $model): void
     {
-        $this->elasticsearch = Elasticsearch::getInstance();
+        $this->getRepository($model)->store($model);
     }
 
-    /**
-     * @throws ClientResponseException
-     * @throws ServerResponseException
-     * @throws MissingParameterException
-     */
-    public function created(Model&Searchable $model): void
-    {
-        $this->elasticsearch->index($model);
-    }
-
-    /**
-     * @throws ServerResponseException
-     * @throws ClientResponseException
-     * @throws MissingParameterException
-     */
-    public function updated(Model&Searchable $model): void
-    {
-        $this->elasticsearch->index($model);
-    }
-
-    /**
-     * @throws ServerResponseException
-     * @throws ClientResponseException
-     * @throws MissingParameterException
-     */
     public function deleted(Model&Searchable $model): void
     {
-        $this->elasticsearch->delete($model);
+        $this->getRepository($model)->delete($model);
+    }
+
+    private function getRepository(Model&Searchable $model): SearchRepository
+    {
+        return RepositoryFactory::for($model);
     }
 }

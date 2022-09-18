@@ -4,7 +4,7 @@ namespace App\Services\Elasticsearch;
 
 interface Searchable
 {
-    public function toSearchArray(): array;
+    public function searchRepositoryClass(): string;
 
     public static function bootSearchableTrait(): void;
 }

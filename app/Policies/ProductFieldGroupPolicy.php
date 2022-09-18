@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\User;
+use App\Models\User\User;
 use App\Models\Role\RoleName;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -15,11 +15,11 @@ class ProductFieldGroupPolicy
 
     public function create(User $user): bool
     {
-        return $user->hasRole(RoleName::admin, RoleName::manager);
+        return $user->hasRole(RoleName::Admin, RoleName::Manager);
     }
 
     public function delete(User $user): bool
     {
-        return $user->hasRole(RoleName::admin, RoleName::manager);
+        return $user->hasRole(RoleName::Admin, RoleName::Manager);
     }
 }

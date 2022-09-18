@@ -16,6 +16,8 @@ class GetRoleListController extends Controller
     {
         $this->authorize(RolePolicy::VIEW_ANY, Role::class);
 
-        return response()->json(Role::all());
+        $roles = Role::getSearchQuery()->get();
+
+        return response()->json($this->transform($roles));
     }
 }

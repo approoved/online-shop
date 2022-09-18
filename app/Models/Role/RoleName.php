@@ -8,7 +8,7 @@ enum RoleName
 {
     use BaseEnum;
 
-    case customer;
-    case manager;
-    case admin;
+    case Customer;
+    case Manager;
+    case Admin;
 }

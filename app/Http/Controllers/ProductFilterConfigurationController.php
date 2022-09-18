@@ -2,66 +2,41 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\User\User;
+use Illuminate\Support\Arr;
 use App\Models\Role\RoleName;
-use App\Models\Product\Product;
 use App\Models\Category\Category;
 use Illuminate\Support\Facades\Gate;
-use App\Models\ProductFilter\ProductFilter;
-use App\Services\Elasticsearch\Elasticsearch;
+use App\Models\ProductField\ProductField;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Http\Requests\ProductFilter\GetFieldListRequest;
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
-use App\Http\Requests\ProductFilter\GetFilterTypeListRequest;
+use App\Exceptions\InvalidAppConfigurationException;
 
 class ProductFilterConfigurationController extends Controller
 {
-    private Elasticsearch $elasticsearch;
-
-    public function __construct()
+    public function getFieldList(Category $category): JsonResponse
     {
-        $this->elasticsearch = Elasticsearch::getInstance();
+        Gate::allowIf(fn (User $user) =>
+            $user->hasRole(RoleName::Admin, RoleName::Manager));
+
+        $fieldsIds = Arr::pluck($category->fields, 'id');
+
+        $fields = ProductField::getSearchQuery()
+            ->whereIn('id', $fieldsIds)
+            ->get();
+
+        return response()->json($this->transform($fields));
     }
 
     /**
-     * @throws ServerResponseException
-     * @throws ClientResponseException
+     * @throws InvalidAppConfigurationException
      */
-    public function getFieldList(GetFieldListRequest $request, Category $category): JsonResponse
+    public function getFilterTypeList(ProductField $field): JsonResponse
     {
-        Gate::allowIf(fn (User $user) => $user->hasRole(RoleName::admin, RoleName::manager));
+        Gate::allowIf(fn (User $user) =>
+            $user->hasRole(RoleName::Admin, RoleName::Manager));
 
-        $data = $request->validated();
+        $filterTypes = $field->getAvailableFilterTypes();
 
-        $filterFields = $this->elasticsearch->getFields(Product::ELASTIC_INDEX, ['category_id' => $category->id]);
-
-        //TODO delete exclude
-
-        if (isset($data['exclude']) && $data['exclude'] === 'taken') {
-            /** @var ProductFilter $filter */
-            foreach ($category->filters as $filter) {
-                if ($key = array_search($filter->field, $filterFields)) {
-                    unset($filterFields[$key]);
-                }
-            }
-        }
-
-        return response()->json(array_values($filterFields));
-    }
-
-    /**
-     * @throws ServerResponseException
-     * @throws ClientResponseException
-     */
-    public function getFilterTypeList(GetFilterTypeListRequest $request, Category $category): JsonResponse
-    {
-        Gate::allowIf(fn (User $user) => $user->hasRole(RoleName::admin, RoleName::manager));
-
-        $data = $request->validated();
-
-        $filterTypes = $this->elasticsearch->getFieldFilterTypeList($category, $data['field']);
-
-        return response()->json($filterTypes);
+        return response()->json($this->transform($filterTypes));
     }
 }
