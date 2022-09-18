@@ -5,34 +5,34 @@ namespace App\Models\Product;
 use Carbon\Carbon;
 use App\Models\BaseModel;
 use App\Models\Category\Category;
+use App\Models\FieldType\FieldTypeName;
 use App\Models\ProductField\ProductField;
-use App\Models\ProductField\FieldTypeName;
 use App\Services\Elasticsearch\Searchable;
 use App\Models\ProductDetail\ProductDetail;
 use Illuminate\Database\Eloquent\Collection;
-use Symfony\Component\HttpFoundation\Response;
+use App\Exceptions\InvalidDataTypeException;
 use App\Services\Elasticsearch\SearchableTrait;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use App\Services\Elasticsearch\Repositories\Product\ProductSearchRepository;
 
 /**
- * PROPERTIES
- * @property int id
- * @property string sku
- * @property string name
- * @property int category_id
- * @property int price
- * @property int quantity
- * @property Carbon created_at
- * @property Carbon updated_at
+ * ATTRIBUTES
+ * @property int $id
+ * @property string $sku
+ * @property string $name
+ * @property int $category_id
+ * @property int $price
+ * @property int $quantity
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  * RELATIONS
- * @property Category category
- * @property Collection<int, ProductField>|null fields
- * @property Collection<int, ProductDetail>|null details
+ * @property Category $category
+ * @property Collection<int, ProductField>|null $fields
+ * @property Collection<int, ProductDetail>|null $details
  */
 class Product extends BaseModel implements Searchable
 {
@@ -55,91 +55,24 @@ class Product extends BaseModel implements Searchable
     ];
 
     public static array $requiredRelationsMatch = [
-        'details' => [
-            'details.field.type'
-        ],
-        'details.field' => [
-            'details.field.type'
-        ],
-        'short-details' => [
-            'details.field.type',
-            'details.field.group'
-        ]
+        'details' => ['details.field.type'],
+        'details.field' => ['details.field.type'],
+        'short-details' => ['details.field.type', 'details.field.group'],
     ];
 
-    public const ELASTIC_INDEX = 'products';
-
-    public function store(array $data): void
-    {
-        if (isset($data['details'])) {
-            $productFields = ProductField::query()
-                ->whereIn('id', array_keys($data['details']))
-                ->with('type')
-                ->get();
-
-            foreach ($data['details'] as $key => $value) {
-                /** @var ProductField $field */
-                $field = $productFields->where('id', $key)->first();
-
-                if (!$field) {
-                    throw new HttpException(
-                        Response::HTTP_UNPROCESSABLE_ENTITY,
-                        sprintf(
-                            'Product field with id %s not found.',
-                            $key
-                        )
-                    );
-                }
-
-                if (! $field->type->acceptDataType($value)) {
-                    throw new HttpException(
-                        Response::HTTP_UNPROCESSABLE_ENTITY,
-                        sprintf(
-                            'Value for field %s in group %s must be of type %s.',
-                            $field->name,
-                            $field->group->name,
-                            $field->type->name
-                        )
-                    );
-                }
-
-                if ($field->hasType(FieldTypeName::date)) {
-                    $data['details'][$key] = Carbon::parse($value);
-                }
-            }
-        }
-
-        $this->fill($data)->save();
-
-        if (isset($data['details'])) {
-            $existingDetails = $this->details()->get();
-
-            /** @var ProductDetail $detail */
-            foreach ($existingDetails as $detail) {
-                $detail->delete();
-            }
-
-            foreach ($data['details'] as $key => $value) {
-                $this->details()->create([
-                    'product_field_id' => $key,
-                    'value' => $value
-                ]);
-            }
-
-            $this->fireModelEvent('updated');
-        }
-    }
-
-    public function toSearchArray(): array
-    {
-        $this->append('short_details');
-
-        return $this->toArray();
-    }
+    /***********************************************************************
+     *                                                                     *
+     *                              RELATIONS                              *
+     *                                                                     *
+     **********************************************************************/
 
     public function category(): BelongsTo
     {
-        return $this->belongsTo(Category::class, 'category_id', 'id');
+        return $this->belongsTo(
+            Category::class,
+            'category_id',
+            'id'
+        );
     }
 
     public function fields(): HasManyThrough
@@ -167,6 +100,24 @@ class Product extends BaseModel implements Searchable
         );
     }
 
+    /***********************************************************************
+     *                                                                     *
+     *                               SCOPES                                *
+     *                                                                     *
+     **********************************************************************/
+
+    /***********************************************************************
+     *                                                                     *
+     *                               SETTERS                               *
+     *                                                                     *
+     **********************************************************************/
+
+    /***********************************************************************
+     *                                                                     *
+     *                               GETTERS                               *
+     *                                                                     *
+     **********************************************************************/
+
     protected function getShortDetailsAttribute(): array
     {
         /** @var Collection<int, ProductDetail>|null $productDetails */
@@ -180,5 +131,72 @@ class Product extends BaseModel implements Searchable
         }
 
         return $result;
+    }
+
+    /***********************************************************************
+     *                                                                     *
+     *                              FUNCTIONS                              *
+     *                                                                     *
+     **********************************************************************/
+
+    /**
+     * @throws InvalidDataTypeException
+     */
+    public function store(array $data): void
+    {
+        if (isset($data['details'])) {
+            $productFields = ProductField::query()
+                ->whereIn('id', array_column($data['details'], 'product_field_id'))
+                ->with('type')
+                ->get();
+
+            foreach ($data['details'] as $key => $detail) {
+                /** @var ProductField $field */
+                $field = $productFields
+                    ->where('id', $detail['product_field_id'])
+                    ->first();
+
+                try {
+                    $field->type->validateDataType($detail['value']);
+                } catch (InvalidDataTypeException $exception) {
+                    throw new InvalidDataTypeException(
+                        sprintf(
+                            'Invalid data type for \'%s\' field. %s',
+                            $field->name,
+                            $exception->getMessage()
+                        )
+                    );
+                }
+
+                if ($field->hasType(FieldTypeName::Date)) {
+                    $data['details'][$key]['value'] = Carbon::parse($data['details'][$key]['value']);
+                }
+            }
+        }
+
+        $this->fill($data)->save();
+
+        if (isset($data['details'])) {
+            $existingDetails = $this->details()->get();
+
+            /** @var ProductDetail $detail */
+            foreach ($existingDetails as $detail) {
+                $detail->delete();
+            }
+
+            foreach ($data['details'] as $detail) {
+                $this->details()->create([
+                    'product_field_id' => $detail['product_field_id'],
+                    'value' => $detail['value']
+                ]);
+            }
+
+            $this->fireModelEvent('saved');
+        }
+    }
+
+    public function searchRepositoryClass(): string
+    {
+        return ProductSearchRepository::class;
     }
 }

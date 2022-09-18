@@ -4,15 +4,16 @@ namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
+use App\Models\FieldType\FieldTypeName;
 use Illuminate\Queue\InteractsWithQueue;
 use App\Models\ProductField\ProductField;
-use App\Models\ProductField\FieldTypeName;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use App\Services\Elasticsearch\Elasticsearch;
+use App\Exceptions\InvalidAppConfigurationException;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use Elastic\Elasticsearch\Exception\MissingParameterException;
+use App\Services\Elasticsearch\Repositories\Product\ProductSearchRepository;
 
 class UpdateProductsMapping implements ShouldQueue
 {
@@ -29,17 +30,15 @@ class UpdateProductsMapping implements ShouldQueue
      * @throws ClientResponseException
      * @throws ServerResponseException
      * @throws MissingParameterException
+     * @throws InvalidAppConfigurationException
      */
-    public function handle(): void
+    public function handle(ProductSearchRepository $repository): void
     {
-        Elasticsearch::getInstance()->putMapping(
-            'products',
-            sprintf(
-                'short_details.%s.%s',
-                $this->field->group->name,
-                $this->field->name
-            ),
-            FieldTypeName::get($this->field->type->name)
-        );
+        $mapping = [
+            'field' => $this->field->getField(),
+            'type' => FieldTypeName::get($this->field->type->name)
+        ];
+
+        $repository->putMappings([$mapping]);
     }
 }

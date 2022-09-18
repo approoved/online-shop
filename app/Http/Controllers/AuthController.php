@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-use App\Models\User;
+use App\Models\User\User;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -19,7 +19,7 @@ final class AuthController extends Controller
         $data = $request->validated();
 
         /** @var User $user */
-        $user = User::query()
+        $user = User::getSearchQuery()
             ->where('token', '=', $data['token'])
             ->firstOrFail();
 
@@ -28,7 +28,7 @@ final class AuthController extends Controller
             'token' => null,
         ]);
 
-        return response()->json($user);
+        return response()->json($this->transform($user));
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -36,7 +36,7 @@ final class AuthController extends Controller
         $data = $request->validated();
 
         /** @var User $user */
-        $user = User::query()
+        $user = User::getSearchQuery()
             ->where('email', '=', $data['email'])
             ->firstOrFail();
 
@@ -46,7 +46,10 @@ final class AuthController extends Controller
 
         $token = $user->createToken('API token')->accessToken;
 
-        return response()->json(['user' => $user, 'token' => $token], Response::HTTP_CREATED);
+        return response()->json([
+            'user' => $this->transform($user),
+            'token' => $token
+        ], Response::HTTP_CREATED);
     }
 
     /**

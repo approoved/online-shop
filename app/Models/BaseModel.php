@@ -11,16 +11,16 @@ abstract class BaseModel extends Model
     use HasFactory;
     use HasQueryBuilder;
 
-    protected static array $allowedIncludes = [];
+    public static array $allowedIncludes = [];
 
-    protected static array $requiredRelationsMatch = [];
+    public static array $requiredRelationsMatch = [];
 
-    private static function getAllowedIncludes(): array
+    public static function getAllowedIncludes(): array
     {
         return static::$allowedIncludes;
     }
 
-    private static function getRequiredRelationsMatch(): array
+    public static function getRequiredRelationsMatch(): array
     {
         return static::$requiredRelationsMatch;
     }

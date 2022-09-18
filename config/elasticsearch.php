@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\ProductField\FieldTypeName;
+use App\Models\FieldType\FieldTypeName;
 
 return [
     'client' => [
@@ -12,12 +12,14 @@ return [
     'indices_settings' => [
         'products' => [
             'mappings' => [
-                ['name' => 'id', 'type' => FieldTypeName::integer],
-                ['name' => 'sku', 'type' => FieldTypeName::text],
-                ['name' => 'name', 'type' => FieldTypeName::text],
-                ['name' => 'category_id', 'type' => FieldTypeName::integer],
-                ['name' => 'price', 'type' => FieldTypeName::float],
-                ['name' => 'quantity', 'type' => FieldTypeName::integer],
+                ['field' => 'id', 'type' => FieldTypeName::Integer],
+                ['field' => 'sku', 'type' => FieldTypeName::Text],
+                ['field' => 'name', 'type' => FieldTypeName::Text],
+                ['field' => 'category_id', 'type' => FieldTypeName::Integer],
+                ['field' => 'price', 'type' => FieldTypeName::Float],
+                ['field' => 'quantity', 'type' => FieldTypeName::Integer],
+                ['field' => 'created_at', 'type' => FieldTypeName::Date],
+                ['field' => 'updated_at', 'type' => FieldTypeName::Date],
             ]
         ],
     ]

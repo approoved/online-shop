@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\User;
+use App\Models\User\User;
 use App\Models\Role\RoleName;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -21,7 +21,7 @@ class ProductPolicy
      */
     public function create(Authenticatable $user): bool
     {
-        return $user->hasRole(RoleName::admin, RoleName::manager);
+        return $user->hasRole(RoleName::Admin, RoleName::Manager);
     }
 
     /**
@@ -29,7 +29,7 @@ class ProductPolicy
      */
     public function update(Authenticatable $user): bool
     {
-        return $user->hasRole(RoleName::admin, RoleName::manager);
+        return $user->hasRole(RoleName::Admin, RoleName::Manager);
     }
 
     /**
@@ -37,7 +37,7 @@ class ProductPolicy
      */
     public function delete(Authenticatable $user): bool
     {
-        return $user->hasRole(RoleName::admin, RoleName::manager);
+        return $user->hasRole(RoleName::Admin, RoleName::Manager);
     }
 
     /**
@@ -45,6 +45,6 @@ class ProductPolicy
      */
     public function decreaseQuantity(Authenticatable $user): bool
     {
-        return $user->hasRole(RoleName::admin);
+        return $user->hasRole(RoleName::Admin);
     }
 }

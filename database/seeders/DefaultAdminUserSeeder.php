@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Carbon\Carbon;
-use App\Models\User;
 use App\Models\Role\Role;
+use App\Models\User\User;
 use App\Models\Role\RoleName;
 use Illuminate\Database\Seeder;
 
@@ -14,7 +14,7 @@ class DefaultAdminUserSeeder extends Seeder
     {
         /** @var Role $adminRole */
         $adminRole = Role::query()
-            ->firstWhere('name', '=', RoleName::admin->value());
+            ->firstWhere('name', '=', RoleName::Admin->value());
 
         /** @var User $admin */
         $admin = User::query()

@@ -13,9 +13,9 @@ abstract class BaseProductFilterValueRequest extends BaseFormRequest
         return [
             'value' => [$required, 'string'],
             'search_value' => [$required, 'array'],
-            'search_value.from' => ['numeric'],
-            'search_value.to' => ['numeric'],
-            'search_value.terms' => ['array'],
+            'search_value.from' => ['sometimes'],
+            'search_value.to' => ['sometimes'],
+            'search_value.terms' => ['sometimes', 'array'],
             'search_value.*' => ['sometimes'],
         ];
     }

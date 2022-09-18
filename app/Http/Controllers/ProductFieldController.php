@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use App\Policies\ProductFieldPolicy;
-use Spatie\QueryBuilder\QueryBuilder;
 use App\Models\ProductField\ProductField;
-use App\Models\ProductField\ProductFieldGroup;
+use App\Exceptions\InvalidInputDataException;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Auth\Access\AuthorizationException;
+use App\Models\ProductFieldGroup\ProductFieldGroup;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Http\Requests\ProductField\CreateProductFieldRequest;
 
@@ -17,8 +17,10 @@ final class ProductFieldController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function store(CreateProductFieldRequest $request, ProductFieldGroup $group): JsonResponse
-    {
+    public function store(
+        CreateProductFieldRequest $request,
+        ProductFieldGroup $group
+    ): JsonResponse {
         $this->authorize(
             ProductFieldPolicy::CREATE,
             ProductField::class
@@ -28,9 +30,17 @@ final class ProductFieldController extends Controller
         $data['product_field_group_id'] = $group->id;
 
         $field = new ProductField();
-        $field->store($data);
 
-        return response()->json($field, Response::HTTP_CREATED);
+        try {
+            $field->store($data);
+        } catch (InvalidInputDataException $exception) {
+            throw new HttpException(
+                Response::HTTP_CONFLICT,
+                $exception->getMessage()
+            );
+        }
+
+        return response()->json($this->transform($field), Response::HTTP_CREATED);
     }
 
     /**
@@ -43,7 +53,7 @@ final class ProductFieldController extends Controller
             ProductField::class
         );
 
-        $fields = ProductField::getSearchQuery()->get();
+        $fields = ProductField::getSearchQuery()->paginate();
 
         return response()->json($this->transform($fields));
     }
@@ -51,11 +61,11 @@ final class ProductFieldController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function show(ProductField $fieldId): JsonResponse
+    public function show(int $fieldId): JsonResponse
     {
         $field = ProductField::getSearchQuery()
             ->where('id', $fieldId)
-            ->first();
+            ->firstOrFail();
 
         $this->authorize(ProductFieldPolicy::VIEW, $field);
 
@@ -72,7 +82,7 @@ final class ProductFieldController extends Controller
         if ($field->hasProducts()) {
             throw new HttpException(
                 Response::HTTP_CONFLICT,
-                'Unable to delete product field with products.'
+                'Unable to delete product field with products. Delete products first.'
             );
         }
 

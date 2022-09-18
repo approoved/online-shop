@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use http\Exception\RuntimeException;
 use Illuminate\Database\Eloquent\Model;
 use League\Fractal\TransformerAbstract;
+use App\Http\Transformers\NullTransformer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -21,28 +22,34 @@ abstract class Controller extends BaseController
     protected const MAX_PER_PAGE = 50;
 
     protected function transform(
-        LengthAwarePaginator|Collection|Model $transformable,
+        LengthAwarePaginator|Collection|Model|null $transformable,
         string $appends = null
     ): array {
-        $model = is_subclass_of($transformable, Model::class)
-            ? $transformable
-            : $transformable->get(0);
+        $isTransformableCollectionOrPaginator = $transformable instanceof Collection
+            || $transformable instanceof LengthAwarePaginator;
+
+        $model = $isTransformableCollectionOrPaginator
+            ? $transformable->get(0)
+            : $transformable;
 
         return fractal($transformable)
             ->transformWith($this->getModelTransformer($model, $appends))
             ->withResourceName(
-                is_subclass_of($transformable, Model::class)
-                ? null
-                : 'data'
+                $isTransformableCollectionOrPaginator
+                ? 'data'
+                : null
             )
             ->toArray();
-
     }
 
     private function getModelTransformer(
-        Model $model,
+        Model|null $model,
         string $appends = null
     ): TransformerAbstract {
+        if ($model === null) {
+            return new NullTransformer();
+        }
+
         $config = config('transformer');
 
         $modelClass = get_class($model);

@@ -9,7 +9,7 @@ final class RetrieveProductFilterRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'include' => ['string'],
+            'append' => ['sometimes', 'string'],
         ];
     }
 }
