@@ -30,7 +30,7 @@ use App\Models\ProductFilter\Exceptions\InvalidFilterTypeException;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Collection|iterable<int, ProductDetail>|null $details
- *                                                                 RELATIONS
+ * RELATIONS
  * @property Category $category
  * @property ProductFilterType $type
  * @property Collection|iterable<int, ProductFilterValue>|null $values

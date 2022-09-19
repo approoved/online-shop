@@ -29,7 +29,7 @@ use App\Services\Elasticsearch\Repositories\Product\ProductSearchRepository;
  * @property int $quantity
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *                              RELATIONS
+ * RELATIONS
  * @property Category $category
  * @property Collection|iterable<int, ProductField>|null $fields
  * @property Collection|iterable<int, ProductDetail>|null $details

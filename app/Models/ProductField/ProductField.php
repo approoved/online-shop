@@ -28,7 +28,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property int $product_field_group_id
- *                                       RELATIONS
+ * RELATIONS
  * @property FieldType $type
  * @property ProductFieldGroup $group
  * @property Collection|iterable<int, Product>|null $products

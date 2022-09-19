@@ -24,7 +24,7 @@ use Franzose\ClosureTable\Extensions\Collection as FranzoseCollection;
  * @property int $position
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *                              RELATIONS
+ * RELATIONS
  * @property Collection|null $children
  * @property Category|null $parent
  * @property Collection|null $products
