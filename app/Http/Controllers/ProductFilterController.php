@@ -3,26 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category\Category;
-use App\Models\ProductFilter\ProductFilterTypeName;
 use App\Policies\ProductFilterPolicy;
 use App\Models\ProductFilter\ProductFilter;
+use App\Exceptions\InvalidInputDataException;
 use Symfony\Component\HttpFoundation\Response;
-use App\Http\Services\Elasticsearch\Elasticsearch;
 use Illuminate\Auth\Access\AuthorizationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Exceptions\InvalidAppConfigurationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
 use App\Http\Requests\ProductFilter\CreateProductFilterRequest;
 use App\Http\Requests\ProductFilter\UpdateProductFilterRequest;
 use App\Http\Requests\ProductFilter\RetrieveProductFilterRequest;
+use App\Models\ProductFilter\Exceptions\InvalidFilterTypeException;
 
 final class ProductFilterController extends Controller
 {
     /**
      * @throws AuthorizationException
-     * @throws ClientResponseException
-     * @throws ServerResponseException
+     * @throws InvalidAppConfigurationException
      */
     public function store(CreateProductFilterRequest $request, Category $category): JsonResponse
     {
@@ -31,78 +29,55 @@ final class ProductFilterController extends Controller
         $data = $request->validated();
         $data['category_id'] = $category->id;
 
-        $productFilter = new ProductFilter();
-        $productFilter->store($data);
+        $filter = new ProductFilter();
 
-        return response()->json($productFilter, Response::HTTP_CREATED);
+        try {
+            $filter->store($data);
+        } catch (InvalidFilterTypeException $exception) {
+            throw new HttpException(
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                $exception->getMessage()
+            );
+        } catch (InvalidInputDataException $exception) {
+            throw new HttpException(
+                Response::HTTP_CONFLICT,
+                $exception->getMessage()
+            );
+        }
+
+        return response()->json($this->transform($filter), Response::HTTP_CREATED);
     }
 
-    /**
-     * @throws ServerResponseException
-     * @throws ClientResponseException
-     */
     public function index(RetrieveProductFilterRequest $request, Category $category): JsonResponse
     {
         $data = $request->validated();
 
-        if ($category->hasDescendants()) {
-            throw new HttpException(
-                Response::HTTP_CONFLICT,
-                'Unable to retrieve filters for parent category.'
-            );
-        }
+        $filters = ProductFilter::getSearchQuery()
+            ->where('category_id', $category->id)
+            ->paginate();
 
-        if (isset($data['include'])) {
-            if ($data['include'] === 'values') {
-                return response()->json($category->filters->load('values'));
-            }
-
-            if ($data['include'] === 'aggregated-values') {
-                $aggregations = [];
-
-                $filters = $category->filters->load('type', 'values');
-
-                $filters = $filters->reject(function (ProductFilter $value) {
-                    return $value->hasType(ProductFilterTypeName::Range, ProductFilterTypeName::Exact)
-                        && $value->values()->count() === 0;
-                });
-
-                /** @var ProductFilter $filter */
-                foreach ($filters as $filter) {
-                    $aggregations[$filter->field] = $filter->aggregate();
-                }
-
-                $aggregated = Elasticsearch::getInstance()
-                    ->getAggregatedFilterValues($category, $aggregations);
-
-                /** @var ProductFilter $filter */
-                foreach ($filters as $filter) {
-                    $filter->unsetRelations();
-                    $filter->values = $aggregated[$filter->field];
-                }
-
-                return response()->json($filters);
-            }
-        }
-
-        return response()->json($category->filters);
+        return response()->json(
+            $this->transform($filters, $data['append'] ?? null)
+        );
     }
 
-    public function show(RetrieveProductFilterRequest $request, ProductFilter $filter): JsonResponse
+    public function show(RetrieveProductFilterRequest $request, int $filterId): JsonResponse
     {
         $data = $request->validated();
 
-        if (isset($data['include']) && $data['include'] === 'values') {
-            return response()->json($filter->load('values'));
-        }
+        /** @var ProductFilter $filter */
+        $filter = ProductFilter::getSearchQuery()
+            ->where('id', $filterId)
+            ->firstOrFail();
 
-        return response()->json($filter);
+        return response()->json(
+            $this->transform($filter, $data['append'] ?? null)
+        );
     }
 
     /**
      * @throws AuthorizationException
-     * @throws ClientResponseException
-     * @throws ServerResponseException
+     * @throws InvalidAppConfigurationException
      */
     public function update(UpdateProductFilterRequest $request, ProductFilter $filter): JsonResponse
     {
@@ -110,9 +85,26 @@ final class ProductFilterController extends Controller
 
         $data = $request->validated();
 
-        $filter->store($data);
+        try {
+            $filter->store($data);
+        } catch (InvalidFilterTypeException $exception) {
+            throw new HttpException(
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                $exception->getMessage()
+            );
+        } catch (InvalidInputDataException $exception) {
+            throw new HttpException(
+                Response::HTTP_CONFLICT,
+                $exception->getMessage()
+            );
+        }
 
-        return response()->json($filter);
+        /** @var ProductFilter $filter */
+        $filter = ProductFilter::getSearchQuery()
+            ->where('id', $filter->id)
+            ->first();
+
+        return response()->json($this->transform($filter));
     }
 
     /**

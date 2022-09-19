@@ -10,12 +10,22 @@ abstract class BaseProductFilterRequest extends BaseFormRequest
     {
         $required = $isCreate ? 'required' : 'sometimes';
 
-        //TODO id
-
         return [
             'name' => [$required, 'string'],
-            'field' => [$required, 'string'],
-            'product_filter_type_id' => [$required, 'exists:product_filter_types,id'],
+            'product_field_id' => [
+                $required,
+                'integer',
+                'numeric',
+                'bail',
+                'exists:product_fields,id'
+            ],
+            'product_filter_type_id' => [
+                $required,
+                'integer',
+                'numeric',
+                'bail',
+                'exists:product_filter_types,id'
+            ],
         ];
     }
 }

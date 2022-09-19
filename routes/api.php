@@ -6,7 +6,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GetRoleListController;
+use App\Http\Controllers\ProductFieldController;
 use App\Http\Controllers\ProductFilterController;
+use App\Http\Controllers\ProductFieldGroupController;
 use App\Http\Controllers\ProductFilterValueController;
 use App\Http\Controllers\ProductFilterConfigurationController;
 
@@ -27,7 +29,7 @@ Route::middleware('auth:api')
         Route::controller(UserController::class)
             ->group(function () {
                 Route::get('/users', 'index');
-                Route::get('/users/{user}', 'show');
+                Route::get('/users/{userId}', 'show');
                 Route::patch('/users/{user}', 'update');
                 Route::delete('/users/{user}', 'destroy');
             });
@@ -35,43 +37,59 @@ Route::middleware('auth:api')
         Route::controller(CategoryController::class)
             ->group( function () {
                 Route::get('/categories', 'index');
-                Route::get('/categories/{category}', 'show');
-                Route::post('/categories/{parent?}', 'store');
+                Route::post('/categories', 'store');
+                Route::get('/categories/{categoryId}', 'show');
                 Route::patch('/categories/{category}', 'update');
                 Route::delete('/categories/{category}', 'destroy');
+            });
+
+        Route::controller(ProductFieldGroupController::class)
+            ->group(function () {
+                Route::post('/product-field-groups', 'store');
+                Route::get('/product-field-groups', 'index');
+                Route::get('/product-field-groups/{groupId}', 'show');
+                Route::delete('/product-field-groups/{group}', 'destroy');
+            });
+
+        Route::controller(ProductFieldController::class)
+            ->group(function () {
+                Route::post('/product-field-groups/{group}/product-fields', 'store');
+                Route::get('/product-fields', 'index');
+                Route::get('/product-fields/{fieldId}', 'show');
+                Route::delete('/product-fields/{field}', 'destroy');
             });
 
         Route::controller(ProductController::class)
             ->group(function () {
                 Route::get('/products', 'index');
-                Route::post('/products', 'store');
-                Route::get('/products/{product}', 'show');
+                Route::post('/categories/{category}/products', 'store');
+                Route::get('/products/{productId}', 'show');
                 Route::patch('/products/{product}', 'update');
                 Route::delete('/products/{product}', 'destroy');
             });
 
         Route::controller(ProductFilterConfigurationController::class)
             ->group(function () {
-                Route::get('/{category}/fields', 'getFieldList');
-                Route::get('/{category}/filter-types', 'getFilterTypeList');
+                Route::get('/categories/{category}/product-fields', 'getFieldList');
+                Route::get('/product-fields/{field}/filter-types', 'getFilterTypeList');
             });
 
         Route::controller(ProductFilterController::class)
             ->group(function () {
-                Route::get('{category}/filters', 'index');
-                Route::post('{category}/filters', 'store');
-                Route::get('/filters/{filter}', 'show');
+                Route::get('/categories/{category}/filters', 'index');
+                Route::post('categories/{category}/filters', 'store');
+                Route::get('/filters/{filterId}', 'show');
                 Route::patch('filters/{filter}', 'update');
                 Route::delete('/filters/{filter}', 'destroy');
             });
 
         Route::controller(ProductFilterValueController::class)
             ->group(function () {
-                Route::get('/{filter}/values', 'index');
-                Route::post('/{filter}/values', 'store');
-                Route::get('/values/{value}', 'show');
-                Route::patch('/values/{value}', 'update');
-                Route::delete('/values/{value}', 'destroy');
+                Route::get('/filters/{filter}/values', 'index');
+                Route::post('/filters/{filter}/values', 'store');
+                Route::get('/filter-values/{valueId}', 'show');
+                Route::patch('/filter-values/{value}', 'update');
+                Route::delete('/filter-values/{value}', 'destroy');
             });
     });
 

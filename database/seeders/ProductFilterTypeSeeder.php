@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\ProductFilter\ProductFilterType;
-use App\Models\ProductFilter\ProductFilterTypeName;
+use App\Models\ProductFilterType\ProductFilterType;
+use App\Models\ProductFilterType\ProductFilterTypeName;
 
 class ProductFilterTypeSeeder extends Seeder
 {

@@ -5,111 +5,110 @@ namespace App\Http\Controllers;
 use App\Models\Product\Product;
 use App\Policies\ProductPolicy;
 use App\Models\Category\Category;
-use App\Models\ProductFilter\ProductFilter;
+use App\Exceptions\InvalidDataTypeException;
+use App\Exceptions\InvalidInputDataException;
+use App\Exceptions\ResourceNotFoundException;
 use Symfony\Component\HttpFoundation\Response;
-use App\Http\Services\Elasticsearch\Elasticsearch;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Illuminate\Auth\Access\AuthorizationException;
-use App\Http\Requests\Product\CreateProductRequest;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Http\Requests\Product\UpdateProductRequest;
+use App\Http\Requests\Product\CreateProductRequest;
+use App\Exceptions\InvalidAppConfigurationException;
 use App\Http\Requests\Product\RetrieveProductRequest;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
+use App\Services\Elasticsearch\Repositories\Product\ProductSearchRepository;
 
 class ProductController extends Controller
 {
     /**
-     * @throws ServerResponseException
+     * @throws InvalidAppConfigurationException
      * @throws ClientResponseException
+     * @throws ServerResponseException
      */
-    public function index(RetrieveProductRequest $request): JsonResponse
-    {
+    public function index(
+        RetrieveProductRequest $request,
+        ProductSearchRepository $repository
+    ): JsonResponse {
         $data = $request->validated();
-        $filters = [];
 
-        if (isset($data['category_id'])) {
-            /** @var Category $category */
-            $category = Category::query()->find($data['category_id']);
-
-            if ($category->hasDescendants()) {
-                if (isset($data['filter'])) {
-                    throw new HttpException(
-                        Response::HTTP_CONFLICT,
-                        'Unable to apply filters to parent category.'
-                    );
-                }
-
-                $descendantsWithSelf = $category->descendantsWithSelf()->get();
-
-                /** @var Category $descendant */
-                foreach ($descendantsWithSelf as $descendant) {
-                    $categoriesIds[] = $descendant->id;
-                }
-            }
-
-            $filters[] = ['terms' => ['category_id' => $categoriesIds ?? [$category->id]]];
-
-            if (isset($data['filter'])) {
-                foreach ($data['filter'] as $filterId => $query) {
-                    $data['filter'][$filterId] = explode(',', $query);
-                }
-
-                foreach ($data['filter'] as $filterId => $query) {
-                    /** @var ProductFilter $filter */
-                    $filter = $category->filters()->find($filterId);
-
-                    if (! $filter) {
-                        throw new HttpException(
-                            Response::HTTP_CONFLICT,
-                            'Filter with id ' . $filterId . ' not found in category ' . $category->name
-                        );
-                    }
-
-                    $filters[] = $filter->apply($query);
-                }
-            }
+        try {
+            $productsIds = $repository->getProductIds($data);
+        } catch (ResourceNotFoundException $exception) {
+            throw new HttpException(
+                Response::HTTP_NOT_FOUND,
+                $exception->getMessage()
+            );
+        } catch (InvalidInputDataException $exception) {
+            throw new HttpException(
+                Response::HTTP_CONFLICT,
+                $exception->getMessage()
+            );
+        } catch (InvalidDataTypeException $exception) {
+            throw new HttpException(
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                $exception->getMessage()
+            );
         }
 
-        return response()->json(Elasticsearch::getInstance()->search(
-            index: Product::ELASTIC_INDEX,
-            query: $data['query'] ?? null,
-            filters: $filters ?? null,
-            perPage: $data['per_page'] ?? null,
-            page: $data['page'] ?? null
-        ));
+        $products = Product::getSearchQuery()
+            ->whereIn('id', $productsIds)
+            ->paginate(perPage: $data['per_page'] ?? null, page: $data['page'] ?? null);
+
+        return response()->json(
+            $this->transform($products, $data['append'] ?? null)
+        );
     }
 
     /**
      * @throws AuthorizationException
      */
-    public function store(CreateProductRequest $request): JsonResponse
+    public function store(CreateProductRequest $request, Category $category): JsonResponse
     {
         $this->authorize(ProductPolicy::CREATE, Product::class);
 
         $data = $request->validated();
 
-        /** @var Category $category */
-        $category = Category::query()
-            ->where('name', '=', $data['category'])
-            ->firstOrFail();
+        if ($category->hasDescendants()) {
+            throw new HttpException(
+                Response::HTTP_CONFLICT,
+                'Unable to add product to parent category.'
+            );
+        }
 
         $data['category_id'] = $category->id;
+        $data['quantity'] = 0;
 
-        $product = Product::query()->create($data);
+        $product = new Product;
 
-        return response()->json($product, Response::HTTP_CREATED);
+        try {
+            $product->store($data);
+        } catch (InvalidDataTypeException $exception) {
+            throw new HttpException(
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                $exception->getMessage()
+            );
+        }
+
+        return response()->json(
+            $this->transform($product),
+            Response::HTTP_CREATED
+        );
     }
 
-    public function show(RetrieveProductRequest $request, Product $product): JsonResponse
+    public function show(RetrieveProductRequest $request, int $productId): JsonResponse
     {
         $data = $request->validated();
 
-        if (isset($data['include']) && $data['include'] === 'category') {
-            $product->load('category');
-        }
+        /** @var Product $product */
+        $product = Product::getSearchQuery()
+            ->where('id', $productId)
+            ->first();
 
-        return response()->json($product);
+        return response()->json(
+            $this->transform($product, $data['append'] ?? null)
+        );
     }
 
     /**
@@ -117,30 +116,32 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product): JsonResponse
     {
-        $this->authorize(ProductPolicy::UPDATE, Product::class);
+        $this->authorize(ProductPolicy::UPDATE, $product);
 
         $data = $request->validated();
 
-        if (isset($data['category'])) {
-            /** @var Category $category */
-            $category = Category::query()
-                ->where('name', '=', $data['category'])
-                ->firstOrFail();
-
-            $data['category_id'] = $category->id;
-        }
-
         if (isset($data['add_quantity'])) {
             if ($data['add_quantity'] < 0) {
-                $this->authorize(ProductPolicy::DECREASE_QUANTITY, Product::class);
+                $this->authorize(ProductPolicy::DECREASE_QUANTITY, $product);
             }
 
             $data['quantity'] = $product->quantity + $data['add_quantity'];
         }
 
-        $product->update($data);
+        try {
+            $product->store($data);
+        } catch (InvalidDataTypeException $exception) {
+            throw new HttpException(
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                $exception->getMessage()
+            );
+        }
 
-        return response()->json($product);
+        $product = Product::getSearchQuery()
+            ->where('id', $product->id)
+            ->first();
+
+        return response()->json($this->transform($product));
     }
 
     /**
@@ -148,7 +149,7 @@ class ProductController extends Controller
      */
     public function destroy(Product $product): Response
     {
-        $this->authorize(ProductPolicy::DELETE, Product::class);
+        $this->authorize(ProductPolicy::DELETE, $product);
 
         $product->delete();
 

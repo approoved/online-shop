@@ -3,122 +3,213 @@
 namespace App\Models\ProductFilter;
 
 use Carbon\Carbon;
+use App\Models\BaseModel;
+use App\Models\Product\Product;
 use App\Models\Category\Category;
-use Ramsey\Collection\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Symfony\Component\HttpFoundation\Response;
-use App\Http\Services\Elasticsearch\Elasticsearch;
+use App\Models\ProductField\ProductField;
+use App\Models\ProductDetail\ProductDetail;
+use Illuminate\Database\Eloquent\Collection;
+use App\Exceptions\InvalidInputDataException;
+use App\Models\ProductFilterType\ProductFilterType;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Exceptions\InvalidAppConfigurationException;
+use App\Models\ProductFilterValue\ProductFilterValue;
+use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Elastic\Elasticsearch\Exception\ClientResponseException;
-use Elastic\Elasticsearch\Exception\ServerResponseException;
+use App\Models\ProductFilterType\ProductFilterTypeName;
+use App\Models\ProductFilter\Exceptions\InvalidFilterTypeException;
 
 /**
- * PROPERTIES
- * @property int id
- * @property string name
- * @property string field
- * @property int product_filter_type_id
- * @property int category_id
- * @property Carbon|null created_at
- * @property Carbon|null updated_at
+ * ATTRIBUTES
+ * @property int $id
+ * @property string $name
+ * @property int $product_filter_type_id
+ * @property int $product_field_id
+ * @property int $category_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Collection<int, ProductDetail>|null $details
  * RELATIONS
- * @property Category category
- * @property ProductFilterType type
- * @property Collection<int, ProductFilterValue>|null|array values
+ * @property Category $category
+ * @property ProductFilterType $type
+ * @property Collection<int, ProductFilterValue>|null $values
+ * @property ProductField $field
  */
-final class ProductFilter extends Model
+final class ProductFilter extends BaseModel
 {
     use HasFactory;
+    use HasRelationships;
 
     protected $fillable = [
         'category_id',
         'name',
-        'field',
+        'product_field_id',
         'product_filter_type_id',
     ];
 
+    public static array $allowedIncludes = [
+        'values',
+        'field.type',
+        'type',
+        'category',
+    ];
+
+    public static array $requiredRelationsMatch = [
+        'aggregated-values' => ['type', 'values', 'category.products.details'],
+    ];
+
+    /***********************************************************************
+     *                                                                     *
+     *                              RELATIONS                              *
+     *                                                                     *
+     **********************************************************************/
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(
+            Category::class,
+            'category_id',
+            'id'
+        );
+    }
+
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(
+            ProductFilterType::class,
+            'product_filter_type_id',
+            'id'
+        );
+    }
+
+    public function values(): HasMany
+    {
+        return $this->hasMany(
+            ProductFilterValue::class,
+            'product_filter_id',
+            'id'
+        );
+    }
+
+    public function field(): BelongsTo
+    {
+        return $this->belongsTo(
+            ProductField::class,
+            'product_field_id',
+            'id'
+        );
+    }
+
+    /***********************************************************************
+     *                                                                     *
+     *                               SCOPES                                *
+     *                                                                     *
+     **********************************************************************/
+
+    /***********************************************************************
+     *                                                                     *
+     *                               SETTERS                               *
+     *                                                                     *
+     **********************************************************************/
+
+    /***********************************************************************
+     *                                                                     *
+     *                               GETTERS                               *
+     *                                                                     *
+     **********************************************************************/
+
+    public function getDetailsAttribute(): array
+    {
+        $details = [];
+
+        /** @var Product $product */
+        foreach ($this->category->products as $product) {
+            /** @var ProductDetail $detail */
+            foreach ($product->details as $detail) {
+                if ($detail->product_field_id === $this->product_field_id) {
+                    $details[] = $detail;
+                }
+            }
+        }
+
+        return $details;
+    }
+
+    /***********************************************************************
+     *                                                                     *
+     *                              FUNCTIONS                              *
+     *                                                                     *
+     **********************************************************************/
+
     /**
-     * @throws ClientResponseException
-     * @throws ServerResponseException
+     * @throws InvalidFilterTypeException
+     * @throws InvalidAppConfigurationException
+     * @throws InvalidInputDataException
      */
     public function store(array $data): void
     {
-        if (isset($data['category_id'])) {
-            /** @var Category $category */
-            $category = Category::query()->find($data['category_id']);
+        /** @var Category $category */
+        $category = Category::query()
+            ->find($data['category_id'] ?? $this->category_id);
 
-            if (! $category) {
-                throw new HttpException(
-                    Response::HTTP_NOT_FOUND,
-                    'Category not found.'
-                );
-            }
-
-            if ($category->hasDescendants()) {
-                throw new HttpException(
-                    Response::HTTP_CONFLICT,
-                    'Unable to create filter for parent category.'
-                );
-            }
-        } else {
-            $category = $this->category;
+        if ($category->hasDescendants()) {
+            throw new InvalidInputDataException(
+                'Unable to create filter for parent category. Delete child categories first.'
+            );
         }
 
-        if (isset($data['field']) || isset($data['product_filter_type_id'])) {
+        if (isset($data['product_field_id']) || isset($data['product_filter_type_id'])) {
             /** @var ProductFilterType $productFilterType */
-            $productFilterType = ProductFilterType::query()->find(
-                $data['product_filter_type_id'] ?? $this->product_filter_type_id
-            );
+            $productFilterType = ProductFilterType::query()
+                ->find($data['product_filter_type_id'] ?? $this->product_filter_type_id);
 
-            if (isset($data['product_filter_type_id']) && ! $productFilterType) {
-                throw new HttpException(
-                    Response::HTTP_NOT_FOUND,
-                    'Filter type not found.'
-                );
-            }
+            /** @var ProductField $productField */
+            $productField = ProductField::query()
+                ->find($data['product_field_id'] ?? $this->product_field_id);
 
-            $availableTypes = Elasticsearch::getInstance()
-                ->getFieldFilterTypeList($category, $data['field'] ?? $this->field);
+            $availableTypes = $productField->getAvailableFilterTypes();
 
             if (! $availableTypes->contains('id', $productFilterType->id)) {
-                throw new HttpException(
-                    Response::HTTP_CONFLICT,
-                    'Unavailable filter type for this field.'
+                throw new InvalidFilterTypeException(
+                    sprintf(
+                        'Unable to create %s type filter for %s type field.',
+                        $productFilterType->name,
+                        $productField->type->name
+                    )
                 );
             }
 
-            if (isset($data['field'])) {
-                if (! in_array($data['field'], Elasticsearch::getInstance()->getFields($category))) {
-                    throw new HttpException(
-                        Response::HTTP_CONFLICT,
-                        'Field ' . $data['field'] .  ' does not exist in category ' . $category->name
-                    );
-                }
+            $availableFields = $category->fields()->get();
 
-                /** @var ProductFilter|null $exists */
-                $exists = $category
-                    ->filters()
-                    ->where('field', $data['field'])
-                    ->first();
+            if (! $availableFields->contains('id', $productField->id)) {
+                throw new InvalidInputDataException(
+                    sprintf(
+                        'Field %s does not exist in category %s. Add products with this field first.',
+                        $productField->name,
+                        $category->name
+                    )
+                );
+            }
 
-                if ($exists && $this->id !== $exists->id) {
-                    throw new HttpException(
-                        Response::HTTP_CONFLICT,
-                        sprintf(
-                            'Filter with field %s already exists in category %s',
-                            $data['field'],
-                            $category->name,
-                        )
-                    );
-                }
+            /** @var ProductFilter|null $exists */
+            $exists = $category
+                ->filters()
+                ->where('product_field_id', $productField->id)
+                ->first();
+
+            if ($exists && $this->id !== $exists->id) {
+                throw new InvalidInputDataException(
+                    sprintf(
+                        'Filter with field \'%s\' already exists in category \'%s\'. Delete existing filter first.',
+                        $productField->name,
+                        $category->name,
+                    )
+                );
             }
         }
 
         $this->fill($data)->save();
-        $this->unsetRelations();
     }
 
     public function hasType(ProductFilterTypeName ...$types): bool
@@ -130,113 +221,5 @@ final class ProductFilter extends Model
         }
 
         return in_array($this->type->name, $typeNames);
-    }
-
-    public function aggregate()
-    {
-        switch (true) {
-            case $this->hasType(ProductFilterTypeName::Runtime):
-                return  [
-                    'terms' => ['field' => $this->field, 'size' =>  100]
-                ];
-            case $this->hasType(ProductFilterTypeName::Range):
-                $ranges = [];
-
-                /** @var ProductFilterValue $value */
-                foreach ($this->values as $value) {
-                    $ranges[] = array_merge($value->search_value, ['key' => $value->value]);
-                }
-
-                return [
-                    'range' => ['field' => $this->field, 'ranges' => $ranges]
-                ];
-            case $this->hasType(ProductFilterTypeName::Exact):
-                $exactFilters = [];
-
-                /** @var ProductFilterValue $value */
-                foreach ($this->values as $value) {
-                    $exactFilters[$value->value] = [
-                        'terms' => [$this->field => $value->search_value['terms']]
-                    ];
-                }
-
-                return [
-                    'filters' => ['filters' => $exactFilters]
-                ];
-        }
-    }
-
-    public function apply(array $query): array
-    {
-        switch (true) {
-            case $this->hasType(ProductFilterTypeName::Runtime):
-                $result =  [
-                    'terms' => [
-                        $this->field => $query,
-                    ]
-                ];
-                break;
-            case $this->hasType(ProductFilterTypeName::Range):
-                $ranges = [];
-
-                foreach ($query as $valueName) {
-                    /** @var ProductFilterValue $filterValue */
-                    $filterValue = $this->values()->where('value', '=', $valueName)->first();
-
-                    if (! $filterValue) {
-                        throw new HttpException(
-                            Response::HTTP_NOT_FOUND,
-                            'Filter value ' . $valueName . ' not found in filter ' . $this->name
-                        );
-                    }
-
-                    $ranges[] = [
-                        'range' => [$this->field => $filterValue->search_value]
-                    ];
-                }
-
-                $result = [
-                    'bool' => ['should' => $ranges]
-                ];
-                break;
-            case $this->hasType(ProductFilterTypeName::Exact):
-                $filterValues = [];
-
-                foreach ($query as $valueName) {
-                    /** @var ProductFilterValue $filterValue */
-                    $filterValue = $this->values()->where('value', '=', $valueName)->first();
-
-                    if (! $filterValue) {
-                        throw new HttpException(
-                            Response::HTTP_NOT_FOUND,
-                            'Filter value ' . $valueName . ' not found in filter ' . $this->name
-                        );
-                    }
-
-                    $filterValues = array_merge($filterValues, $filterValue->search_value['terms']);
-                }
-
-                $result = [
-                    'terms' => [$this->field => $filterValues]
-                ];
-                break;
-        }
-
-        return $result;
-    }
-
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class, 'category_id', 'id');
-    }
-
-    public function type(): BelongsTo
-    {
-        return $this->belongsTo(ProductFilterType::class, 'product_filter_type_id', 'id');
-    }
-
-    public function values(): HasMany
-    {
-        return $this->hasMany(ProductFilterValue::class, 'product_filter_id', 'id');
     }
 }

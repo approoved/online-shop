@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\User;
+use App\Models\User\User;
 use App\Models\Role\RoleName;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -22,7 +22,7 @@ class UserPolicy
      */
     public function viewAny(Authenticatable $user): bool
     {
-        return $user->hasRole(RoleName::admin, RoleName::manager);
+        return $user->hasRole(RoleName::Admin, RoleName::Manager);
     }
 
     /**
@@ -31,7 +31,7 @@ class UserPolicy
     public function view(Authenticatable $authUser, User $user): bool
     {
         return $authUser->id === $user->id ||
-            $authUser->hasRole(RoleName::admin, RoleName::manager);
+            $authUser->hasRole(RoleName::Admin, RoleName::Manager);
     }
 
     /**
@@ -47,7 +47,7 @@ class UserPolicy
      */
     public function updateRole(Authenticatable $authUser, User $user): bool
     {
-        return $authUser->hasRole(RoleName::admin) &&
+        return $authUser->hasRole(RoleName::Admin) &&
             $authUser->id !== $user->id;
     }
 
