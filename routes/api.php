@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GetRoleListController;
@@ -35,7 +35,7 @@ Route::middleware('auth:api')
             });
 
         Route::controller(CategoryController::class)
-            ->group( function () {
+            ->group(function () {
                 Route::get('/categories', 'index');
                 Route::post('/categories', 'store');
                 Route::get('/categories/{categoryId}', 'show');
@@ -92,4 +92,3 @@ Route::middleware('auth:api')
                 Route::delete('/filter-values/{value}', 'destroy');
             });
     });
-

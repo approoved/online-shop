@@ -19,7 +19,7 @@ class ExactProductFilterAggregationSerializer
                 if (! isset($aggregation[$value->value])) {
                     $aggregation[$value->value] = [
                         'value' => $value->value,
-                        'count' => 0
+                        'count' => 0,
                     ];
                 }
 

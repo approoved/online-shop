@@ -11,8 +11,11 @@ class ProductFieldPolicy
     use HandlesAuthorization;
 
     public const CREATE = 'create';
+
     public const VIEW_ANY = 'viewAny';
+
     public const VIEW = 'view';
+
     public const DELETE = 'delete';
 
     public function create(User $user): bool

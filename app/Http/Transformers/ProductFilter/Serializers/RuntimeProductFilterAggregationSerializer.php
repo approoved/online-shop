@@ -7,7 +7,7 @@ use App\Models\ProductFilter\ProductFilter;
 
 class RuntimeProductFilterAggregationSerializer
 {
-    public static function serialize(ProductFilter $filter):  array
+    public static function serialize(ProductFilter $filter): array
     {
         $aggregation = [];
 
@@ -16,7 +16,7 @@ class RuntimeProductFilterAggregationSerializer
             if (! isset($aggregation[(string) $detail->value])) {
                 $aggregation[(string) $detail->value] = [
                     'value' => $detail->value,
-                    'count' => 0
+                    'count' => 0,
                 ];
             }
 

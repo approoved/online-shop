@@ -37,7 +37,7 @@ class RuntimeFilterRequestSerializer
         return [
             'terms' => [
                 $filter->field->getField() => $query,
-            ]
+            ],
         ];
     }
 }

@@ -46,7 +46,7 @@ class ReindexProduct extends Command
         foreach ($fields as $field) {
             $mappings[] = [
                 'field' => $field->getField(),
-                'type' => FieldTypeName::get($field->type->name)
+                'type' => FieldTypeName::get($field->type->name),
             ];
         }
 

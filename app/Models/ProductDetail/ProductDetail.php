@@ -31,11 +31,11 @@ class ProductDetail extends BaseModel
     ];
 
     protected $with = [
-        'field.type'
+        'field.type',
     ];
 
     public static array $allowedIncludes = [
-        'field'
+        'field',
     ];
 
     /***********************************************************************

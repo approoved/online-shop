@@ -41,7 +41,7 @@ class FilterRequestSerializer
         return [
             ProductFilterTypeName::Runtime->value() => RuntimeFilterRequestSerializer::class,
             ProductFilterTypeName::Range->value() => RangeFilterRequestSerializer::class,
-            ProductFilterTypeName::Exact->value() => ExactFilterRequestSerializer::class
+            ProductFilterTypeName::Exact->value() => ExactFilterRequestSerializer::class,
         ];
     }
 }

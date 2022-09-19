@@ -12,8 +12,11 @@ class ProductPolicy
     use HandlesAuthorization;
 
     public const CREATE = 'create';
+
     public const UPDATE = 'update';
+
     public const DELETE = 'delete';
+
     public const DECREASE_QUANTITY = 'decreaseQuantity';
 
     /**

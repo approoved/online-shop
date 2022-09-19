@@ -83,22 +83,21 @@ class ProductSearchRepository extends BaseSearchRepository
                     'fields' => ['*'],
                     'fuzziness' => 'AUTO',
                     'operator' => 'or',
-                    'type' => 'most_fields'
+                    'type' => 'most_fields',
                 ],
             ];
         }
 
         $response = $this->searchOnElasticsearch(
-            $searchQuery ?? null,  $filters ?? null
+            $searchQuery ?? null,
+            $filters ?? null
         );
-
 
         return Arr::pluck($response['hits']['hits'], '_id');
     }
 
     /**
      * @param Product $model
-     * @return array
      */
     public function toSearchArray(Model&Searchable $model): array
     {

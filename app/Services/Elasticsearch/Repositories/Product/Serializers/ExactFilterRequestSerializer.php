@@ -24,7 +24,8 @@ class ExactFilterRequestSerializer
 
             if (! $filterValue) {
                 throw new ResourceNotFoundException(
-                    sprintf('Filter value \'%s\' not found in filter \'%s\'.',
+                    sprintf(
+                        'Filter value \'%s\' not found in filter \'%s\'.',
                         $valueName,
                         $filter->name
                     )
@@ -35,7 +36,7 @@ class ExactFilterRequestSerializer
         }
 
         return [
-            'terms' => [$filter->field->getField() => $terms]
+            'terms' => [$filter->field->getField() => $terms],
         ];
     }
 }

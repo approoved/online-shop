@@ -34,13 +34,13 @@ class RangeFilterRequestSerializer
 
             $ranges[] = [
                 'range' => [
-                    $filter->field->getField()  => $filterValue->search_value
-                ]
+                    $filter->field->getField() => $filterValue->search_value,
+                ],
             ];
         }
 
         return [
-            'bool' => ['should' => $ranges]
+            'bool' => ['should' => $ranges],
         ];
     }
 }

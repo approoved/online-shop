@@ -6,7 +6,7 @@ return [
 
     'auth' => [
         'username' => env('TELESCOPE_LOGIN', 'telescope'),
-        'password' => env('TELESCOPE_PASSWORD', 'password')
+        'password' => env('TELESCOPE_PASSWORD', 'password'),
     ],
 
     /*

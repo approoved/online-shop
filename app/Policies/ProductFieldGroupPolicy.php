@@ -11,6 +11,7 @@ class ProductFieldGroupPolicy
     use HandlesAuthorization;
 
     public const CREATE = 'create';
+
     public const DELETE = 'delete';
 
     public function create(User $user): bool

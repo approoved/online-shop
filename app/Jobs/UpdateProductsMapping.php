@@ -36,7 +36,7 @@ class UpdateProductsMapping implements ShouldQueue
     {
         $mapping = [
             'field' => $this->field->getField(),
-            'type' => FieldTypeName::get($this->field->type->name)
+            'type' => FieldTypeName::get($this->field->type->name),
         ];
 
         $repository->putMappings([$mapping]);
