@@ -6,11 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 use App\Http\Transformers\BaseTransformer;
 use App\Models\ProductFieldGroup\ProductFieldGroup;
 
-class ProductFieldGroupTransformer extends BaseTransformer
+final class ProductFieldGroupTransformer extends BaseTransformer
 {
     /**
      * @param Model&ProductFieldGroup $model
-     * @return array
      */
     public function transform(Model $model): array
     {

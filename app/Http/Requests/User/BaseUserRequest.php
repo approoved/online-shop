@@ -26,6 +26,7 @@ abstract class BaseUserRequest extends BaseFormRequest
             ],
             'password' => [
                 $required,
+                'required_with:new_password',
                 'min:9',
             ],
             'new_password' => [
@@ -33,8 +34,8 @@ abstract class BaseUserRequest extends BaseFormRequest
                 'min:9',
             ],
             'role' => [
-              'sometimes',
-              'string',
+                'sometimes',
+                'string',
             ],
         ];
     }

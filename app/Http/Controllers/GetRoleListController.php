@@ -7,7 +7,7 @@ use App\Policies\RolePolicy;
 use Illuminate\Auth\Access\AuthorizationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-class GetRoleListController extends Controller
+final class GetRoleListController extends Controller
 {
     /**
      * @throws AuthorizationException
@@ -18,6 +18,6 @@ class GetRoleListController extends Controller
 
         $roles = Role::getSearchQuery()->get();
 
-        return response()->json($this->transform($roles));
+        return $this->transformToJson($roles);
     }
 }

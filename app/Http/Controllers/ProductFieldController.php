@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
 use App\Policies\ProductFieldPolicy;
 use App\Models\ProductField\ProductField;
 use App\Exceptions\InvalidInputDataException;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Auth\Access\AuthorizationException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Models\ProductFieldGroup\ProductFieldGroup;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Http\Requests\ProductField\CreateProductFieldRequest;
@@ -40,7 +40,7 @@ final class ProductFieldController extends Controller
             );
         }
 
-        return response()->json($this->transform($field), Response::HTTP_CREATED);
+        return $this->transformToJson($field, status: Response::HTTP_CREATED);
     }
 
     /**
@@ -55,7 +55,7 @@ final class ProductFieldController extends Controller
 
         $fields = ProductField::getSearchQuery()->paginate();
 
-        return response()->json($this->transform($fields));
+        return $this->transformToJson($fields);
     }
 
     /**
@@ -69,7 +69,7 @@ final class ProductFieldController extends Controller
 
         $this->authorize(ProductFieldPolicy::VIEW, $field);
 
-        return response()->json($this->transform($field));
+        return $this->transformToJson($field);
     }
 
     /**

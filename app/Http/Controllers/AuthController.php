@@ -28,7 +28,7 @@ final class AuthController extends Controller
             'token' => null,
         ]);
 
-        return response()->json($this->transform($user));
+        return $this->transformToJson($user);
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -46,10 +46,13 @@ final class AuthController extends Controller
 
         $token = $user->createToken('API token')->accessToken;
 
-        return response()->json([
-            'user' => $this->transform($user),
-            'token' => $token
-        ], Response::HTTP_CREATED);
+        return response()->json(
+            [
+                'user' => $this->transform($user),
+                'token' => $token,
+            ],
+            Response::HTTP_CREATED
+        );
     }
 
     /**

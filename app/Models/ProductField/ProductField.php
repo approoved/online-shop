@@ -6,14 +6,14 @@ use Carbon\Carbon;
 use RuntimeException;
 use App\Models\BaseModel;
 use App\Models\Product\Product;
-use App\Models\FieldType\FieldType;
 use App\Jobs\UpdateProductsMapping;
+use App\Models\FieldType\FieldType;
 use App\Models\FieldType\FieldTypeName;
 use App\Models\ProductDetail\ProductDetail;
 use Illuminate\Database\Eloquent\Collection;
 use App\Exceptions\InvalidInputDataException;
-use App\Models\ProductFilterType\ProductFilterType;
 use App\Models\ProductFieldGroup\ProductFieldGroup;
+use App\Models\ProductFilterType\ProductFilterType;
 use App\Exceptions\InvalidAppConfigurationException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
@@ -28,10 +28,10 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property int $product_field_group_id
- * RELATIONS
+ *                                       RELATIONS
  * @property FieldType $type
  * @property ProductFieldGroup $group
- * @property Collection<int, Product>|null $products
+ * @property Collection|iterable<int, Product>|null $products
  */
 class ProductField extends BaseModel
 {
@@ -46,7 +46,7 @@ class ProductField extends BaseModel
 
     public static array $allowedIncludes = [
         'type',
-        'group'
+        'group',
     ];
 
     /***********************************************************************

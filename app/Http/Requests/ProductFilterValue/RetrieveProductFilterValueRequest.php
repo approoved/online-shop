@@ -5,7 +5,7 @@ namespace App\Http\Requests\ProductFilterValue;
 use App\Http\Requests\BaseFormRequest;
 use App\Http\Controllers\ProductFilterValueController;
 
-class RetrieveProductFilterValueRequest extends BaseFormRequest
+final class RetrieveProductFilterValueRequest extends BaseFormRequest
 {
     public function rules(): array
     {
@@ -16,7 +16,7 @@ class RetrieveProductFilterValueRequest extends BaseFormRequest
                 'integer',
                 'min:1',
                 'max:' . ProductFilterValueController::getMaxPerPage(),
-            ]
+            ],
         ];
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Category;
 
-class CreateCategoryRequest extends BaseCategoryRequest
+final class CreateCategoryRequest extends BaseCategoryRequest
 {
     public function rules(): array
     {

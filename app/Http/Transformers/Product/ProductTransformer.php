@@ -7,11 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use App\Http\Transformers\BaseTransformer;
 use App\Models\ProductDetail\ProductDetail;
 
-class ProductTransformer extends BaseTransformer
+final class ProductTransformer extends BaseTransformer
 {
     /**
      * @param Model&Product $model
-     * @return array
      */
     public function transform(Model $model): array
     {

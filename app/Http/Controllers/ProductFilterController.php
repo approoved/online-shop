@@ -45,7 +45,7 @@ final class ProductFilterController extends Controller
             );
         }
 
-        return response()->json($this->transform($filter), Response::HTTP_CREATED);
+        return $this->transformToJson($filter, status: Response::HTTP_CREATED);
     }
 
     public function index(RetrieveProductFilterRequest $request, Category $category): JsonResponse
@@ -56,9 +56,7 @@ final class ProductFilterController extends Controller
             ->where('category_id', $category->id)
             ->paginate();
 
-        return response()->json(
-            $this->transform($filters, $data['append'] ?? null)
-        );
+        return $this->transformToJson($filters, $data['append'] ?? null);
     }
 
     public function show(RetrieveProductFilterRequest $request, int $filterId): JsonResponse
@@ -70,9 +68,7 @@ final class ProductFilterController extends Controller
             ->where('id', $filterId)
             ->firstOrFail();
 
-        return response()->json(
-            $this->transform($filter, $data['append'] ?? null)
-        );
+        return $this->transformToJson($filter, $data['append'] ?? null);
     }
 
     /**
@@ -104,7 +100,7 @@ final class ProductFilterController extends Controller
             ->where('id', $filter->id)
             ->first();
 
-        return response()->json($this->transform($filter));
+        return $this->transformToJson($filter);
     }
 
     /**

@@ -2,15 +2,14 @@
 
 namespace App\Http\Transformers\User;
 
-use App\Http\Transformers\BaseTransformer;
 use App\Models\User\User;
 use Illuminate\Database\Eloquent\Model;
+use App\Http\Transformers\BaseTransformer;
 
-class UserTransformer extends BaseTransformer
+final class UserTransformer extends BaseTransformer
 {
     /**
      * @param Model&User $model
-     * @return array
      */
     public function transform(Model $model): array
     {

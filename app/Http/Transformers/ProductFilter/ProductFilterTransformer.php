@@ -8,11 +8,10 @@ use App\Models\ProductFilter\ProductFilter;
 use App\Exceptions\InvalidAppConfigurationException;
 use App\Http\Transformers\ProductFilter\Serializers\ProductFilterAggregationSerializer;
 
-class ProductFilterTransformer extends BaseTransformer
+final class ProductFilterTransformer extends BaseTransformer
 {
     /**
      * @param Model&ProductFilter $model
-     * @return array
      * @throws InvalidAppConfigurationException
      */
     public function transform(Model $model): array

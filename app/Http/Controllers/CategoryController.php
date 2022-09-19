@@ -14,7 +14,7 @@ use App\Http\Requests\Category\RetrieveCategoryRequest;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Franzose\ClosureTable\Extensions\Collection as ClosureTableCollection;
 
-class CategoryController extends Controller
+final class CategoryController extends Controller
 {
     /**
      * @throws AuthorizationException
@@ -32,28 +32,25 @@ class CategoryController extends Controller
         /** @var Category $category */
         $category = Category::query()->create($data);
 
-        return response()->json(
-            $this->transform($category),
-            Response::HTTP_CREATED
-        );
+        return $this->transformToJson($category, status: Response::HTTP_CREATED);
     }
 
     public function index(RetrieveCategoryRequest $request): JsonResponse
     {
         $data = $request->validated();
 
-        if (isset($data['serialize']) && $data['serialize'] === 'tree') {
+        if ($data['serialize'] ?? null === 'tree') {
             /** @var ClosureTableCollection $categories */
             $categories = Category::all();
 
             return response()->json($categories->toTree());
         }
 
-        /** @var Collection<int, Category> $categories */
+        /** @var Collection|iterable<int, Category> $categories */
         $categories = Category::getSearchQuery()
             ->paginate();
 
-        return response()->json($this->transform($categories));
+        return $this->transformToJson($categories);
     }
 
     public function show(RetrieveCategoryRequest $request, int $categoryId): JsonResponse
@@ -65,9 +62,7 @@ class CategoryController extends Controller
             ->where('id', $categoryId)
             ->firstOrFail();
 
-        return response()->json(
-            $this->transform($category, $data['append'] ?? null)
-        );
+        return $this->transformToJson($category, $data['append'] ?? null);
     }
 
     /**
@@ -89,7 +84,7 @@ class CategoryController extends Controller
             ->where('id', $category->id)
             ->first();
 
-        return response()->json($this->transform($category));
+        return $this->transformToJson($category);
     }
 
     /**

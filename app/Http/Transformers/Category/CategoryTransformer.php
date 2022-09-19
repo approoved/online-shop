@@ -6,11 +6,10 @@ use App\Models\Category\Category;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Transformers\BaseTransformer;
 
-class CategoryTransformer extends BaseTransformer
+final class CategoryTransformer extends BaseTransformer
 {
     /**
      * @param Model&Category $model
-     * @return array
      */
     public function transform(Model $model): array
     {

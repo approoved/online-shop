@@ -6,8 +6,8 @@ use Carbon\Carbon;
 use App\Models\Product\Product;
 use Franzose\ClosureTable\Models\Entity;
 use App\Models\ProductField\ProductField;
-use App\Models\ProductFilter\ProductFilter;
 use App\Models\ProductDetail\ProductDetail;
+use App\Models\ProductFilter\ProductFilter;
 use Illuminate\Database\Eloquent\Collection;
 use App\Services\QueryBuilder\HasQueryBuilder;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
@@ -24,12 +24,12 @@ use Franzose\ClosureTable\Extensions\Collection as FranzoseCollection;
  * @property int $position
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * RELATIONS
+ *                              RELATIONS
  * @property Collection|null $children
  * @property Category|null $parent
  * @property Collection|null $products
- * @property Collection<int, ProductFilter>|null $filters
- * @property Collection<int, ProductField>|null $fields
+ * @property Collection|iterable<int, ProductFilter>|null $filters
+ * @property Collection|iterable<int, ProductField>|null $fields
  */
 class Category extends Entity
 {
@@ -54,7 +54,7 @@ class Category extends Entity
     protected $closure = CategoryClosure::class;
 
     public static array $allowedIncludes = [
-        'products'
+        'products',
     ];
 
     public static array $requiredRelationsMatch = [];
@@ -100,12 +100,12 @@ class Category extends Entity
             [
                 'category_id',
                 'product_id',
-                'id'
+                'id',
             ],
             [
                 'id',
                 'id',
-                'product_field_id'
+                'product_field_id',
             ]
         )->distinct();
     }
@@ -163,7 +163,7 @@ class Category extends Entity
         }
 
         foreach ($collection as $item) {
-            if (key_exists($item->id, $result)) {
+            if (array_key_exists($item->id, $result)) {
                 $result[$item->id]->parent = $item;
             }
         }

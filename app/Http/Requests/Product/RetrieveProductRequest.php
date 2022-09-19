@@ -5,7 +5,7 @@ namespace App\Http\Requests\Product;
 use App\Http\Requests\BaseFormRequest;
 use App\Http\Controllers\ProductController;
 
-class RetrieveProductRequest extends BaseFormRequest
+final class RetrieveProductRequest extends BaseFormRequest
 {
     public function rules(): array
     {

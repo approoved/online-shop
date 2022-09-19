@@ -16,6 +16,8 @@ abstract class BaseTransformer extends TransformerAbstract
 
     protected array $appends = [];
 
+    abstract public function transform(Model $model): array;
+
     public function __construct(string|null $appends = null)
     {
         $config = config('transformer');
@@ -26,7 +28,7 @@ abstract class BaseTransformer extends TransformerAbstract
             throw new RuntimeException(
                 sprintf(
                     'Model is not configured for transformer. Class - %s.',
-                static::class
+                    static::class
                 )
             );
         }
@@ -34,7 +36,7 @@ abstract class BaseTransformer extends TransformerAbstract
         $availableIncludes = [];
 
         foreach (get_class_vars($modelClass)['allowedIncludes'] as $include) {
-            if (!in_array(strtok($include, '.'), $availableIncludes)) {
+            if (! in_array(strtok($include, '.'), $availableIncludes)) {
                 $availableIncludes[] = strtok($include, '.');
             }
         }
@@ -43,30 +45,24 @@ abstract class BaseTransformer extends TransformerAbstract
         $this->appends = explode(',', $appends) ?? [];
     }
 
-    abstract public function transform(Model $model):  array;
-
     /**
-     * @param Scope $scope
-     * @param string $includeName
-     * @param mixed $data
-     * @return bool|ResourceInterface
      * @throws Exception
      */
     protected function callIncludeMethod(Scope $scope, string $includeName, $data): bool|ResourceInterface
     {
         $methodName = 'include' . str_replace(
+            ' ',
+            '',
+            ucwords(str_replace(
+                '_',
                 ' ',
-                '',
-                ucwords(str_replace(
-                    '_',
+                str_replace(
+                    '-',
                     ' ',
-                    str_replace(
-                        '-',
-                        ' ',
-                        $includeName
-                    )
-                ))
-            );
+                    $includeName
+                )
+            ))
+        );
 
         if (method_exists(static::class, $methodName)) {
             return parent::callIncludeMethod($scope, $includeName, $data);
@@ -75,12 +71,14 @@ abstract class BaseTransformer extends TransformerAbstract
         $model = $data;
         $include = $model->$includeName;
         $includeObject = $include instanceof Collection
-            ? $include->get(0)
+            ? $include->first()
             : $include;
 
+        $transformer = $this->getIncludeObjectTransformer($includeObject);
+
         return $model->$includeName instanceof Collection
-            ? $this->collection($data->$includeName, $this->getIncludeObjectTransformer($includeObject))
-            : $this->item($data->$includeName, $this->getIncludeObjectTransformer($includeObject));
+            ? $this->collection($data->$includeName, $transformer)
+            : $this->item($data->$includeName, $transformer);
     }
 
     private function getIncludeObjectTransformer(Model|null $includeObject): TransformerAbstract
@@ -95,11 +93,13 @@ abstract class BaseTransformer extends TransformerAbstract
 
         if (! array_key_exists($includeClass, $config)) {
             throw new RuntimeException(
-                sprintf('Transformer class is not configured for model. Class - %s.',
-                $includeClass)
+                sprintf(
+                    'Transformer class is not configured for model. Class - %s.',
+                    $includeClass
+                )
             );
         }
 
-        return new $config[$includeClass];
+        return new $config[$includeClass]();
     }
 }

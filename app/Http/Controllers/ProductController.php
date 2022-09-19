@@ -11,8 +11,8 @@ use App\Exceptions\ResourceNotFoundException;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Auth\Access\AuthorizationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Http\Requests\Product\UpdateProductRequest;
 use App\Http\Requests\Product\CreateProductRequest;
+use App\Http\Requests\Product\UpdateProductRequest;
 use App\Exceptions\InvalidAppConfigurationException;
 use App\Http\Requests\Product\RetrieveProductRequest;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -20,7 +20,7 @@ use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
 use App\Services\Elasticsearch\Repositories\Product\ProductSearchRepository;
 
-class ProductController extends Controller
+final class ProductController extends Controller
 {
     /**
      * @throws InvalidAppConfigurationException
@@ -54,11 +54,9 @@ class ProductController extends Controller
 
         $products = Product::getSearchQuery()
             ->whereIn('id', $productsIds)
-            ->paginate(perPage: $data['per_page'] ?? null, page: $data['page'] ?? null);
+            ->paginate($data['per_page'] ?? null);
 
-        return response()->json(
-            $this->transform($products, $data['append'] ?? null)
-        );
+        return $this->transformToJson($products, $data['append'] ?? null);
     }
 
     /**
@@ -80,7 +78,7 @@ class ProductController extends Controller
         $data['category_id'] = $category->id;
         $data['quantity'] = 0;
 
-        $product = new Product;
+        $product = new Product();
 
         try {
             $product->store($data);
@@ -91,10 +89,7 @@ class ProductController extends Controller
             );
         }
 
-        return response()->json(
-            $this->transform($product),
-            Response::HTTP_CREATED
-        );
+        return $this->transformToJson($product, status:Response::HTTP_CREATED);
     }
 
     public function show(RetrieveProductRequest $request, int $productId): JsonResponse
@@ -106,9 +101,7 @@ class ProductController extends Controller
             ->where('id', $productId)
             ->first();
 
-        return response()->json(
-            $this->transform($product, $data['append'] ?? null)
-        );
+        return $this->transformToJson($product, $data['append'] ?? null);
     }
 
     /**
@@ -141,7 +134,7 @@ class ProductController extends Controller
             ->where('id', $product->id)
             ->first();
 
-        return response()->json($this->transform($product));
+        return $this->transformToJson($product);
     }
 
     /**

@@ -29,24 +29,21 @@ final class ProductFieldGroupController extends Controller
 
         try {
             $group->fill($data)->save();
-        } catch (InvalidInputDataException$exception) {
+        } catch (InvalidInputDataException $exception) {
             throw new HttpException(
                 Response::HTTP_CONFLICT,
                 $exception->getMessage()
             );
         }
 
-        return response()->json(
-            $this->transform($group),
-            Response::HTTP_CREATED
-        );
+        return $this->transformToJson($group, status: Response::HTTP_CREATED);
     }
 
     public function index(): JsonResponse
     {
         $groups = ProductFieldGroup::getSearchQuery()->paginate();
 
-        return response()->json($this->transform($groups));
+        return $this->transformToJson($groups);
     }
 
     public function show(int $groupId): JsonResponse
@@ -55,7 +52,7 @@ final class ProductFieldGroupController extends Controller
             ->where('id', $groupId)
             ->firstOrFail();
 
-        return response()->json($this->transform($group));
+        return $this->transformToJson($group);
     }
 
     /**

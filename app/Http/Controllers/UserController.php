@@ -37,7 +37,7 @@ final class UserController extends Controller
         $notification = new EmailVerification($user);
         $user->notify($notification);
 
-        return response()->json($this->transform($user), Response::HTTP_CREATED);
+        return $this->transformToJson($user, status: Response::HTTP_CREATED);
     }
 
     /**
@@ -50,7 +50,7 @@ final class UserController extends Controller
         $users = User::getSearchQuery()
             ->paginate();
 
-        return response()->json($this->transform($users));
+        return $this->transformToJson($users);
     }
 
     /**
@@ -65,7 +65,7 @@ final class UserController extends Controller
 
         $this->authorize(UserPolicy::VIEW, $user);
 
-        return response()->json($this->transform($user));
+        return $this->transformToJson($user);
     }
 
     /**
@@ -90,7 +90,7 @@ final class UserController extends Controller
                 ->where('id', $user->id)
                 ->first();
 
-            return response()->json($this->transform($user));
+            return $this->transformToJson($user);
         }
 
         $this->authorize(UserPolicy::UPDATE, $user);
@@ -101,14 +101,11 @@ final class UserController extends Controller
         }
 
         if (isset($data['new_password'])) {
-            if (
-                ! isset($data['password'])
-                || Hash::check($data['password'] ?? null, $user->password)
-            ) {
-                    throw new HttpException(
-                        Response::HTTP_NOT_FOUND,
-                        'Invalid current password'
-                    );
+            if (! Hash::check($data['password'], $user->password)) {
+                throw new HttpException(
+                    Response::HTTP_NOT_FOUND,
+                    'Invalid current password'
+                );
             }
 
             $data['password'] = bcrypt($data['new_password']);
@@ -121,7 +118,7 @@ final class UserController extends Controller
             $user->notify($notification);
         }
 
-        return response()->json($this->transform($user));
+        return $this->transformToJson($user);
     }
 
     /**
