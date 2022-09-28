@@ -39,6 +39,12 @@ class Category extends Entity
 
     public $timestamps = true;
 
+    public static array $allowedIncludes = [
+        'products',
+    ];
+
+    public static array $requiredRelationsMatch = [];
+
     protected $fillable = [
         'name',
         'parent_id',
@@ -52,12 +58,6 @@ class Category extends Entity
     protected $table = 'categories';
 
     protected $closure = CategoryClosure::class;
-
-    public static array $allowedIncludes = [
-        'products',
-    ];
-
-    public static array $requiredRelationsMatch = [];
 
     /***********************************************************************
      *                                                                     *

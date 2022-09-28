@@ -31,7 +31,10 @@ class ProductFieldGroup extends BaseModel
 
     protected $fillable = ['name'];
 
-    public static array $allowedIncludes = ['fields.type'];
+    public static array $allowedIncludes = [
+        'fields',
+        'fields.type',
+    ];
 
     /***********************************************************************
      *                                                                     *

@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Models\ProductFieldGroup\ProductFieldGroup;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Http\Requests\ProductField\CreateProductFieldRequest;
+use App\Http\Requests\ProductField\RetrieveProductFieldRequest;
 
 final class ProductFieldController extends Controller
 {
@@ -46,8 +47,10 @@ final class ProductFieldController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function index(): JsonResponse
+    public function index(RetrieveProductFieldRequest $request): JsonResponse
     {
+        $data = $request->validated();
+
         $this->authorize(
             ProductFieldPolicy::VIEW_ANY,
             ProductField::class
@@ -61,8 +64,10 @@ final class ProductFieldController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function show(int $fieldId): JsonResponse
+    public function show(RetrieveProductFieldRequest $request, int $fieldId): JsonResponse
     {
+        $data = $request->validated();
+
         $field = ProductField::getSearchQuery()
             ->where('id', $fieldId)
             ->firstOrFail();

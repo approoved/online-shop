@@ -9,12 +9,13 @@ use App\Exceptions\InvalidDataTypeException;
 use App\Exceptions\InvalidInputDataException;
 use App\Exceptions\ResourceNotFoundException;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Requests\Product\GetProductRequest;
 use Illuminate\Auth\Access\AuthorizationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Http\Requests\Product\CreateProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 use App\Exceptions\InvalidAppConfigurationException;
-use App\Http\Requests\Product\RetrieveProductRequest;
+use App\Http\Requests\Product\GetProductListRequest;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Elastic\Elasticsearch\Exception\ClientResponseException;
 use Elastic\Elasticsearch\Exception\ServerResponseException;
@@ -28,7 +29,7 @@ final class ProductController extends Controller
      * @throws ServerResponseException
      */
     public function index(
-        RetrieveProductRequest $request,
+        GetProductListRequest   $request,
         ProductSearchRepository $repository
     ): JsonResponse {
         $data = $request->validated();
@@ -92,7 +93,7 @@ final class ProductController extends Controller
         return $this->transformToJson($product, status:Response::HTTP_CREATED);
     }
 
-    public function show(RetrieveProductRequest $request, int $productId): JsonResponse
+    public function show(GetProductRequest $request, int $productId): JsonResponse
     {
         $data = $request->validated();
 

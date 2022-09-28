@@ -38,15 +38,15 @@ class ProductField extends BaseModel
     use HasFactory;
     use HasRelationships;
 
+    public static array $allowedIncludes = [
+        'type',
+        'group',
+    ];
+
     protected $fillable = [
         'name',
         'product_field_group_id',
         'field_type_id',
-    ];
-
-    public static array $allowedIncludes = [
-        'type',
-        'group',
     ];
 
     /***********************************************************************

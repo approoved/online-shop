@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Policies\ProductFieldGroupPolicy;
-use App\Exceptions\InvalidInputDataException;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Auth\Access\AuthorizationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Models\ProductFieldGroup\ProductFieldGroup;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Http\Requests\ProductFieldGroup\CreateProductFieldGroupRequest;
+use App\Http\Requests\ProductFieldGroup\RetrieveProductFieldGroupRequest;
 
 final class ProductFieldGroupController extends Controller
 {
@@ -31,15 +31,19 @@ final class ProductFieldGroupController extends Controller
         return $this->transformToJson($group, status: Response::HTTP_CREATED);
     }
 
-    public function index(): JsonResponse
+    public function index(RetrieveProductFieldGroupRequest $request): JsonResponse
     {
+        $data = $request->validated();
+
         $groups = ProductFieldGroup::getSearchQuery()->paginate();
 
         return $this->transformToJson($groups);
     }
 
-    public function show(int $groupId): JsonResponse
+    public function show(RetrieveProductFieldGroupRequest $request, int $groupId): JsonResponse
     {
+        $data = $request->validated();
+
         $group = ProductFieldGroup::getSearchQuery()
             ->where('id', $groupId)
             ->firstOrFail();

@@ -12,9 +12,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Models\ProductFilterValue\ProductFilterValue;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Models\ProductFilter\Exceptions\InvalidFilterTypeException;
+use App\Http\Requests\ProductFilterValue\GetProductFilterValueRequest;
 use App\Http\Requests\ProductFilterValue\CreateProductFilterValueRequest;
 use App\Http\Requests\ProductFilterValue\UpdateProductFilterValueRequest;
-use App\Http\Requests\ProductFilterValue\RetrieveProductFilterValueRequest;
+use App\Http\Requests\ProductFilterValue\GetProductFilterValueListRequest;
 
 class ProductFilterValueController extends Controller
 {
@@ -57,8 +58,8 @@ class ProductFilterValueController extends Controller
      * @throws AuthorizationException
      */
     public function index(
-        RetrieveProductFilterValueRequest $request,
-        ProductFilter $filter
+        GetProductFilterValueListRequest $request,
+        ProductFilter                    $filter
     ): JsonResponse {
         $this->authorize(
             ProductFilterValuePolicy::VIEW_ANY,
@@ -77,8 +78,10 @@ class ProductFilterValueController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function show(int $valueId): JsonResponse
+    public function show(GetProductFilterValueRequest $request, int $valueId): JsonResponse
     {
+        $data = $request->validated();
+
         /** @var ProductFilterValue $value */
         $value = ProductFilterValue::getSearchQuery()
             ->where('id', $valueId)

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\User\RetrieveUserRequest;
 use App\Models\Role\Role;
 use App\Models\User\User;
 use Illuminate\Support\Str;
@@ -43,8 +44,10 @@ final class UserController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function index(): JsonResponse
+    public function index(RetrieveUserRequest $request): JsonResponse
     {
+        $data = $request->validated();
+
         $this->authorize(UserPolicy::VIEW_ANY, User::class);
 
         $users = User::getSearchQuery()
@@ -56,8 +59,10 @@ final class UserController extends Controller
     /**
      * @throws AuthorizationException
      */
-    public function show(int $userId): JsonResponse
+    public function show(RetrieveUserRequest $request, int $userId): JsonResponse
     {
+        $data = $request->validated();
+
         /** @var User $user */
         $user = User::getSearchQuery()
             ->where('id', $userId)
