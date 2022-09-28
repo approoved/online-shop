@@ -9,7 +9,6 @@ use App\Models\Product\Product;
 use App\Models\ProductField\ProductField;
 use App\Models\ProductDetail\ProductDetail;
 use Illuminate\Database\Eloquent\Collection;
-use App\Exceptions\InvalidInputDataException;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
@@ -69,19 +68,10 @@ class ProductFieldGroup extends BaseModel
 
     /***********************************************************************
      *                                                                     *
-     *                               SCOPES                                *
-     *                                                                     *
-     **********************************************************************/
-
-    /***********************************************************************
-     *                                                                     *
      *                               SETTERS                               *
      *                                                                     *
      **********************************************************************/
 
-    /**
-     * @throws InvalidInputDataException
-     */
     public function setNameAttribute(string $value): void
     {
         if ($this->name) {
@@ -90,24 +80,8 @@ class ProductFieldGroup extends BaseModel
             );
         }
 
-        $exists = ProductFieldGroup::query()
-            ->where('name', $value)
-            ->first();
-
-        if ($exists) {
-            throw new InvalidInputDataException(
-                'The name has already been taken. Delete existing group first.'
-            );
-        }
-
         $this->attributes['name'] = $value;
     }
-
-    /***********************************************************************
-     *                                                                     *
-     *                               GETTERS                               *
-     *                                                                     *
-     **********************************************************************/
 
     /***********************************************************************
      *                                                                     *

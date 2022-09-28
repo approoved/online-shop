@@ -35,7 +35,9 @@ abstract class BaseTransformer extends TransformerAbstract
 
         $availableIncludes = [];
 
-        foreach (get_class_vars($modelClass)['allowedIncludes'] as $include) {
+        $allowedIncludes = call_user_func($modelClass . '::getAllowedIncludes');
+
+        foreach ($allowedIncludes as $include) {
             if (! in_array(strtok($include, '.'), $availableIncludes)) {
                 $availableIncludes[] = strtok($include, '.');
             }

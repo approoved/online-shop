@@ -7,7 +7,7 @@ use App\Models\Role\RoleName;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class ProductPolicy
+final class ProductPolicy
 {
     use HandlesAuthorization;
 

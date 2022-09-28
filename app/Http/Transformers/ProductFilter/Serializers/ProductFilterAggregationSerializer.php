@@ -6,7 +6,7 @@ use App\Models\ProductFilter\ProductFilter;
 use App\Exceptions\InvalidAppConfigurationException;
 use App\Models\ProductFilterType\ProductFilterTypeName;
 
-class ProductFilterAggregationSerializer
+final class ProductFilterAggregationSerializer
 {
     /**
      * @throws InvalidAppConfigurationException

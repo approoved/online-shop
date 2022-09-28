@@ -99,7 +99,7 @@ final class ProductController extends Controller
         /** @var Product $product */
         $product = Product::getSearchQuery()
             ->where('id', $productId)
-            ->first();
+            ->firstOrFail();
 
         return $this->transformToJson($product, $data['append'] ?? null);
     }

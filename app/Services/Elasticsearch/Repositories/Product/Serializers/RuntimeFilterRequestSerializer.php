@@ -6,13 +6,18 @@ use Carbon\Carbon;
 use App\Models\FieldType\FieldTypeName;
 use App\Models\ProductFilter\ProductFilter;
 use App\Exceptions\InvalidDataTypeException;
+use App\Services\Elasticsearch\Repositories\Product\ProductSearchRepository;
 
-class RuntimeFilterRequestSerializer
+final class RuntimeFilterRequestSerializer
 {
+    public function __construct(private readonly ProductSearchRepository $repository)
+    {
+    }
+
     /**
      * @throws InvalidDataTypeException
      */
-    public static function serialize(ProductFilter $filter, array $query): array
+    public function serialize(ProductFilter $filter, array $query): array
     {
         if ($filter->field->hasType(FieldTypeName::Date)) {
             foreach ($query as $element) {
@@ -36,7 +41,7 @@ class RuntimeFilterRequestSerializer
 
         return [
             'terms' => [
-                $filter->field->getField() => $query,
+                $this->repository->getSearchField($filter->field) => $query,
             ],
         ];
     }
