@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\ProductFilterValue;
 
-class CreateProductFilterValueRequest extends BaseProductFilterValueRequest
+final class CreateProductFilterValueRequest extends BaseProductFilterValueRequest
 {
     public function rules(): array
     {

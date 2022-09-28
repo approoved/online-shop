@@ -9,8 +9,8 @@ use App\Models\FieldType\FieldTypeName;
 use App\Models\ProductField\ProductField;
 use App\Services\Elasticsearch\Searchable;
 use App\Models\ProductDetail\ProductDetail;
-use Illuminate\Database\Eloquent\Collection;
 use App\Exceptions\InvalidDataTypeException;
+use Illuminate\Database\Eloquent\Collection;
 use App\Services\Elasticsearch\SearchableTrait;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -31,8 +31,8 @@ use App\Services\Elasticsearch\Repositories\Product\ProductSearchRepository;
  * @property Carbon $updated_at
  * RELATIONS
  * @property Category $category
- * @property Collection<int, ProductField>|null $fields
- * @property Collection<int, ProductDetail>|null $details
+ * @property Collection&iterable<int, ProductField>|null $fields
+ * @property Collection&iterable<int, ProductDetail>|null $details
  */
 class Product extends BaseModel implements Searchable
 {
@@ -82,11 +82,11 @@ class Product extends BaseModel implements Searchable
             [ProductDetail::class],
             [
                 'product_id',
-                'id'
+                'id',
             ],
             [
                 'id',
-                'product_field_id'
+                'product_field_id',
             ]
         );
     }
@@ -102,25 +102,13 @@ class Product extends BaseModel implements Searchable
 
     /***********************************************************************
      *                                                                     *
-     *                               SCOPES                                *
-     *                                                                     *
-     **********************************************************************/
-
-    /***********************************************************************
-     *                                                                     *
-     *                               SETTERS                               *
-     *                                                                     *
-     **********************************************************************/
-
-    /***********************************************************************
-     *                                                                     *
      *                               GETTERS                               *
      *                                                                     *
      **********************************************************************/
 
     protected function getShortDetailsAttribute(): array
     {
-        /** @var Collection<int, ProductDetail>|null $productDetails */
+        /** @var Collection&iterable<int, ProductDetail>|null $productDetails */
         $productDetails = $this->details()->with('field.type', 'field.group')->get();
 
         $result = [];
@@ -187,7 +175,7 @@ class Product extends BaseModel implements Searchable
             foreach ($data['details'] as $detail) {
                 $this->details()->create([
                     'product_field_id' => $detail['product_field_id'],
-                    'value' => $detail['value']
+                    'value' => $detail['value'],
                 ]);
             }
 

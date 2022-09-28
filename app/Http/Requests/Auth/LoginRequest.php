@@ -14,7 +14,7 @@ final class LoginRequest extends BaseFormRequest
                 'email',
             ],
             'password' => [
-              'required',
+                'required',
             ],
         ];
     }

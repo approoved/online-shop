@@ -6,14 +6,14 @@ use Carbon\Carbon;
 use RuntimeException;
 use App\Models\BaseModel;
 use App\Models\Product\Product;
-use App\Models\FieldType\FieldType;
 use App\Jobs\UpdateProductsMapping;
+use App\Models\FieldType\FieldType;
 use App\Models\FieldType\FieldTypeName;
 use App\Models\ProductDetail\ProductDetail;
 use Illuminate\Database\Eloquent\Collection;
 use App\Exceptions\InvalidInputDataException;
-use App\Models\ProductFilterType\ProductFilterType;
 use App\Models\ProductFieldGroup\ProductFieldGroup;
+use App\Models\ProductFilterType\ProductFilterType;
 use App\Exceptions\InvalidAppConfigurationException;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
@@ -31,7 +31,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * RELATIONS
  * @property FieldType $type
  * @property ProductFieldGroup $group
- * @property Collection<int, Product>|null $products
+ * @property Collection&iterable<int, Product>|null $products
  */
 class ProductField extends BaseModel
 {
@@ -46,7 +46,7 @@ class ProductField extends BaseModel
 
     public static array $allowedIncludes = [
         'type',
-        'group'
+        'group',
     ];
 
     /***********************************************************************
@@ -87,85 +87,55 @@ class ProductField extends BaseModel
 
     /***********************************************************************
      *                                                                     *
-     *                               SCOPES                                *
-     *                                                                     *
-     **********************************************************************/
-
-    /***********************************************************************
-     *                                                                     *
-     *                               SETTERS                               *
-     *                                                                     *
-     **********************************************************************/
-
-    public function setProductFieldGroupIdAttribute(int $value): void
-    {
-        if ($this->product_field_group_id) {
-            throw new RuntimeException(
-                'Product field group id updating is restricted.',
-            );
-        }
-
-        $this->attributes['product_field_group_id'] = $value;
-    }
-
-    /**
-     * @throws InvalidInputDataException
-     */
-    public function setNameAttribute(string $value): void
-    {
-        if ($this->name) {
-            throw new RuntimeException(
-                'Product field name updating is restricted.',
-            );
-        }
-
-        if (! $this->product_field_group_id) {
-            throw new RuntimeException(
-                'Object\'s relation \'product field group\' is not set.'
-            );
-        }
-
-        $exists = ProductField::query()
-            ->where('name', $value)
-            ->first();
-
-        if ($exists) {
-            throw new InvalidInputDataException(
-                'The name has already been taken. Delete existing field first.'
-            );
-        }
-
-        $this->attributes['name'] = $value;
-    }
-
-    public function setFieldTypeIdAttribute(int $value): void
-    {
-        if ($this->field_type_id) {
-            throw new RuntimeException(
-                'Field type id updating is restricted.',
-            );
-        }
-
-        $this->attributes['field_type_id'] = $value;
-    }
-
-    /***********************************************************************
-     *                                                                     *
-     *                               GETTERS                               *
-     *                                                                     *
-     **********************************************************************/
-
-    /***********************************************************************
-     *                                                                     *
      *                              FUNCTIONS                              *
      *                                                                     *
      **********************************************************************/
 
+     /**
+     * @throws InvalidInputDataException
+     */
     public function store(array $data): void
     {
-        $this->product_field_group_id = $data['product_field_group_id'];
-        $this->name = $data['name'];
-        $this->field_type_id = $data['field_type_id'];
+        if (isset($data['product_field_group_id'])) {
+            if ($this->product_field_group_id) {
+                throw new RuntimeException(
+                    'Product field group id updating is restricted.',
+                );
+            }
+
+            $this->product_field_group_id = $data['product_field_group_id'];
+        }
+
+        if (isset($data['name'])) {
+            if ($this->name) {
+                throw new RuntimeException(
+                    'Product field name updating is restricted.',
+                );
+            }
+
+            $exists = $this->group
+                ->fields()
+                ->where('name', $data['name'])
+                ->first();
+
+            if ($exists) {
+                throw new InvalidInputDataException(
+                    'The name has already been taken. Delete existing field first.'
+                );
+            }
+
+            $this->name = $data['name'];
+        }
+
+        if (isset($data['field_type_id'])) {
+            if ($this->field_type_id) {
+                throw new RuntimeException(
+                    'Field type id updating is restricted.',
+                );
+            }
+
+            $this->field_type_id = $data['field_type_id'];
+        }
 
         $this->save();
 
@@ -177,11 +147,6 @@ class ProductField extends BaseModel
     public function hasProducts(): bool
     {
         return $this->products()->count();
-    }
-
-    public function getField(): string
-    {
-        return sprintf('short_details.%s.%s', $this->group->name, $this->name);
     }
 
     public function hasType(FieldTypeName ...$fieldTypeNames): bool
@@ -197,6 +162,7 @@ class ProductField extends BaseModel
 
     /**
      * @throws InvalidAppConfigurationException
+     * @return Collection&iterable<int, ProductFilterType>
      */
     public function getAvailableFilterTypes(): Collection
     {

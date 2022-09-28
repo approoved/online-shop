@@ -4,6 +4,6 @@ namespace App\Models\ProductFilterValue\Exceptions;
 
 use Exception;
 
-class InvalidFilterTypeException extends Exception
+final class InvalidFilterTypeException extends Exception
 {
 }

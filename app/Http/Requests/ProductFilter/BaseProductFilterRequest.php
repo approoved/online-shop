@@ -17,14 +17,14 @@ abstract class BaseProductFilterRequest extends BaseFormRequest
                 'integer',
                 'numeric',
                 'bail',
-                'exists:product_fields,id'
+                'exists:product_fields,id',
             ],
             'product_filter_type_id' => [
                 $required,
                 'integer',
                 'numeric',
                 'bail',
-                'exists:product_filter_types,id'
+                'exists:product_filter_types,id',
             ],
         ];
     }

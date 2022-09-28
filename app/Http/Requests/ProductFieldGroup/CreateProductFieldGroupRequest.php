@@ -4,7 +4,7 @@ namespace App\Http\Requests\ProductFieldGroup;
 
 use App\Http\Requests\BaseFormRequest;
 
-class CreateProductFieldGroupRequest extends BaseFormRequest
+final class CreateProductFieldGroupRequest extends BaseFormRequest
 {
     public function rules(): array
     {

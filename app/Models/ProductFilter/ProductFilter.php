@@ -14,8 +14,8 @@ use App\Models\ProductFilterType\ProductFilterType;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Exceptions\InvalidAppConfigurationException;
 use App\Models\ProductFilterValue\ProductFilterValue;
-use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\ProductFilterType\ProductFilterTypeName;
 use App\Models\ProductFilter\Exceptions\InvalidFilterTypeException;
@@ -29,11 +29,11 @@ use App\Models\ProductFilter\Exceptions\InvalidFilterTypeException;
  * @property int $category_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property Collection<int, ProductDetail>|null $details
+ * @property Collection&iterable<int, ProductDetail>|null $details
  * RELATIONS
  * @property Category $category
  * @property ProductFilterType $type
- * @property Collection<int, ProductFilterValue>|null $values
+ * @property Collection&iterable<int, ProductFilterValue>|null $values
  * @property ProductField $field
  */
 final class ProductFilter extends BaseModel
@@ -100,18 +100,6 @@ final class ProductFilter extends BaseModel
             'id'
         );
     }
-
-    /***********************************************************************
-     *                                                                     *
-     *                               SCOPES                                *
-     *                                                                     *
-     **********************************************************************/
-
-    /***********************************************************************
-     *                                                                     *
-     *                               SETTERS                               *
-     *                                                                     *
-     **********************************************************************/
 
     /***********************************************************************
      *                                                                     *

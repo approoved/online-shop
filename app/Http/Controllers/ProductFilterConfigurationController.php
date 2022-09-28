@@ -11,12 +11,11 @@ use App\Models\ProductField\ProductField;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Exceptions\InvalidAppConfigurationException;
 
-class ProductFilterConfigurationController extends Controller
+final class ProductFilterConfigurationController extends Controller
 {
     public function getFieldList(Category $category): JsonResponse
     {
-        Gate::allowIf(fn (User $user) =>
-            $user->hasRole(RoleName::Admin, RoleName::Manager));
+        Gate::allowIf(fn (User $user) => $user->hasRole(RoleName::Admin, RoleName::Manager));
 
         $fieldsIds = Arr::pluck($category->fields, 'id');
 
@@ -24,7 +23,7 @@ class ProductFilterConfigurationController extends Controller
             ->whereIn('id', $fieldsIds)
             ->get();
 
-        return response()->json($this->transform($fields));
+        return $this->transformToJson($fields);
     }
 
     /**
@@ -32,11 +31,10 @@ class ProductFilterConfigurationController extends Controller
      */
     public function getFilterTypeList(ProductField $field): JsonResponse
     {
-        Gate::allowIf(fn (User $user) =>
-            $user->hasRole(RoleName::Admin, RoleName::Manager));
+        Gate::allowIf(fn (User $user) => $user->hasRole(RoleName::Admin, RoleName::Manager));
 
         $filterTypes = $field->getAvailableFilterTypes();
 
-        return response()->json($this->transform($filterTypes));
+        return $this->transformToJson($filterTypes);
     }
 }

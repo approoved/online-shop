@@ -4,6 +4,6 @@ namespace App\Exceptions;
 
 use Exception;
 
-class InvalidDataTypeException extends Exception
+final class InvalidDataTypeException extends Exception
 {
 }

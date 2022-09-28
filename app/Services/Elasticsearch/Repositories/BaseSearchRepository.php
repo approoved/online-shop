@@ -20,6 +20,8 @@ abstract class BaseSearchRepository implements SearchRepository
 
     protected const MAX_RESULT_SIZE = 10000;
 
+    abstract public function getIndex(): string;
+
     /**
      * @throws AuthenticationException
      */
@@ -123,17 +125,17 @@ abstract class BaseSearchRepository implements SearchRepository
                 'type' => 'keyword',
                 'fields' => [
                     $mapping['type']->value() => [
-                        'type' => $mapping['type']->value()
-                    ]
-                ]
+                        'type' => $mapping['type']->value(),
+                    ],
+                ],
             ];
         }
 
         $this->elasticsearch->indices()->putMapping([
             'index' => $this->getIndex(),
             'body' => [
-                'properties' => $properties
-            ]
+                'properties' => $properties,
+            ],
         ]);
     }
 
@@ -165,7 +167,7 @@ abstract class BaseSearchRepository implements SearchRepository
         $this->elasticsearch->index([
             'index' => static::getIndex(),
             'id' => $this->getId($model),
-            'body' => $this->toSearchArray($model)
+            'body' => $this->toSearchArray($model),
         ]);
     }
 
@@ -178,7 +180,7 @@ abstract class BaseSearchRepository implements SearchRepository
     {
         $this->elasticsearch->delete([
             'index' => $this->getIndex(),
-            'id' => $this->getId($model)
+            'id' => $this->getId($model),
         ]);
     }
 
@@ -196,13 +198,13 @@ abstract class BaseSearchRepository implements SearchRepository
      * @throws ServerResponseException
      * @throws ClientResponseException
      */
-    public function searchOnElasticsearch(array $query = null, array $filters = null): array {
-
+    public function searchOnElasticsearch(array $query = null, array $filters = null): array
+    {
         $data = [
             'index' => $this->getIndex(),
             'body' => [
                 'size' => static::MAX_RESULT_SIZE,
-            ]
+            ],
         ];
 
         if ($query) {
@@ -215,6 +217,4 @@ abstract class BaseSearchRepository implements SearchRepository
 
         return $this->elasticsearch->search($data)->asArray();
     }
-
-    abstract public function getIndex(): string;
 }

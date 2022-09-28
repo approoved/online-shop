@@ -6,11 +6,10 @@ use App\Models\Role\Role;
 use Illuminate\Database\Eloquent\Model;
 use App\Http\Transformers\BaseTransformer;
 
-class RoleTransformer extends BaseTransformer
+final class RoleTransformer extends BaseTransformer
 {
     /**
      * @param Model&Role $model
-     * @return array
      */
     public function transform(Model $model): array
     {

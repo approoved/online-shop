@@ -7,12 +7,14 @@ use App\Models\Role\RoleName;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class CategoryPolicy
+final class CategoryPolicy
 {
     use HandlesAuthorization;
 
     public const CREATE = 'create';
+
     public const UPDATE = 'update';
+
     public const DELETE = 'delete';
 
     /**

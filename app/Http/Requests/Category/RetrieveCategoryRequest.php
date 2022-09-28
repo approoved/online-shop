@@ -10,7 +10,7 @@ final class RetrieveCategoryRequest extends BaseFormRequest
     {
         return [
             'serialize' => ['sometimes', 'string'],
-            'append' => ['sometimes', 'string']
+            'append' => ['sometimes', 'string'],
         ];
     }
 }

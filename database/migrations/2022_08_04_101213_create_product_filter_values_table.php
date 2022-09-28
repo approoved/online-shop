@@ -12,7 +12,7 @@ return new class extends Migration
 
         Schema::create('product_filter_values', function (Blueprint $table) {
             $table->id();
-            $table->integer('product_filter_id');
+            $table->unsignedBigInteger('product_filter_id');
             $table->string('value');
             $table->json('search_value');
             $table->timestamps();

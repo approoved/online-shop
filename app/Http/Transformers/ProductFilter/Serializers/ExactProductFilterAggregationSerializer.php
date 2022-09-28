@@ -6,7 +6,7 @@ use App\Models\ProductDetail\ProductDetail;
 use App\Models\ProductFilter\ProductFilter;
 use App\Models\ProductFilterValue\ProductFilterValue;
 
-class ExactProductFilterAggregationSerializer
+final class ExactProductFilterAggregationSerializer
 {
     public static function serialize(ProductFilter $filter): array
     {
@@ -19,7 +19,7 @@ class ExactProductFilterAggregationSerializer
                 if (! isset($aggregation[$value->value])) {
                     $aggregation[$value->value] = [
                         'value' => $value->value,
-                        'count' => 0
+                        'count' => 0,
                     ];
                 }
 

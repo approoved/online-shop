@@ -18,7 +18,7 @@ trait BaseEnum
     public static function get(string|int $value): static
     {
         foreach (self::cases() as $case) {
-            if ($case->value() ===  $value) {
+            if ($case->value() === $value) {
                 return $case;
             }
         }

@@ -13,7 +13,7 @@ class ProductFilterTypeSeeder extends Seeder
         /** @var ProductFilterTypeName $typeName */
         foreach (ProductFilterTypeName::getList() as $typeName) {
             ProductFilterType::query()->updateOrCreate([
-                'name' => $typeName->value()
+                'name' => $typeName->value(),
             ]);
         }
     }

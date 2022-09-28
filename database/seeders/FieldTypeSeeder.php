@@ -13,7 +13,7 @@ class FieldTypeSeeder extends Seeder
         /** @var FieldTypeName $typeName */
         foreach (FieldTypeName::getList() as $typeName) {
             FieldType::query()->updateOrCreate([
-                'name' => $typeName->value()
+                'name' => $typeName->value(),
             ]);
         }
     }

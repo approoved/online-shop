@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
 use App\Policies\ProductFilterValuePolicy;
 use App\Models\ProductFilter\ProductFilter;
 use App\Exceptions\InvalidDataTypeException;
 use App\Exceptions\InvalidInputDataException;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Auth\Access\AuthorizationException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Models\ProductFilterValue\ProductFilterValue;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Models\ProductFilter\Exceptions\InvalidFilterTypeException;
@@ -50,9 +50,7 @@ class ProductFilterValueController extends Controller
             );
         }
 
-        return response()->json(
-            $this->transform($value), Response::HTTP_CREATED
-        );
+        return $this->transformToJson($value, status: Response::HTTP_CREATED);
     }
 
     /**
@@ -71,9 +69,9 @@ class ProductFilterValueController extends Controller
 
         $values = ProductFilterValue::getSearchQuery()
             ->where('product_filter_id', $filter->id)
-            ->paginate(perPage: $data['per_page'] ?? null, page: $data['page'] ?? null);
+            ->paginate($data['per_page'] ?? null);
 
-        return response()->json($this->transform($values));
+        return $this->transformToJson($values);
     }
 
     /**
@@ -88,7 +86,7 @@ class ProductFilterValueController extends Controller
 
         $this->authorize(ProductFilterValuePolicy::VIEW, $value);
 
-        return response()->json($this->transform($value));
+        return $this->transformToJson($value);
     }
 
     /**
@@ -121,7 +119,7 @@ class ProductFilterValueController extends Controller
             ->where('id', $value->id)
             ->first();
 
-        return response()->json($this->transform($value));
+        return $this->transformToJson($value);
     }
 
     /**

@@ -24,7 +24,7 @@ class ProductFactory extends Factory
             $weight[] = $i . ' lbs';
         }
 
-        return $phones =  [
+        return $phones = [
             'sku' => $this->faker->uuid(),
             'name' => $this->faker->sentence(),
             'category_id' => $this->faker->randomElement($categoryIds),
@@ -48,8 +48,8 @@ class ProductFactory extends Factory
                     'Weight' => $this->faker->randomElement($weight),
                     'Screen, inches' => $this->faker->randomFloat(1, 10, 20),
                     'CPU' => $this->faker->sentence(3),
-                ]
-            ]
+                ],
+            ],
         ];
     }
 }

@@ -20,7 +20,7 @@ return [
                 ['field' => 'quantity', 'type' => FieldTypeName::Integer],
                 ['field' => 'created_at', 'type' => FieldTypeName::Date],
                 ['field' => 'updated_at', 'type' => FieldTypeName::Date],
-            ]
+            ],
         ],
-    ]
+    ],
 ];

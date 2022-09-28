@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use http\Exception\RuntimeException;
+use RuntimeException;
 use Illuminate\Database\Eloquent\Model;
 use League\Fractal\TransformerAbstract;
 use App\Http\Transformers\NullTransformer;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -20,6 +21,11 @@ abstract class Controller extends BaseController
     use AuthorizesRequests;
 
     protected const MAX_PER_PAGE = 50;
+
+    public static function getMaxPerPage(): string
+    {
+        return static::MAX_PER_PAGE;
+    }
 
     protected function transform(
         LengthAwarePaginator|Collection|Model|null $transformable,
@@ -36,10 +42,18 @@ abstract class Controller extends BaseController
             ->transformWith($this->getModelTransformer($model, $appends))
             ->withResourceName(
                 $isTransformableCollectionOrPaginator
-                ? 'data'
-                : null
+                    ? 'data'
+                    : null
             )
             ->toArray();
+    }
+
+    protected function transformToJson(
+        LengthAwarePaginator|Collection|Model|null $transformable,
+        string $appends = null,
+        int $status = 200
+    ): JsonResponse {
+        return response()->json($this->transform($transformable, $appends), $status);
     }
 
     private function getModelTransformer(
@@ -52,20 +66,17 @@ abstract class Controller extends BaseController
 
         $config = config('transformer');
 
-        $modelClass = get_class($model);
+        $modelClass = $model::class;
 
         if (! array_key_exists($modelClass, $config)) {
             throw new RuntimeException(
-                'Transformer class is not configured for %s model.',
-                $modelClass
+                sprintf(
+                    'Transformer class is not configured for %s model.',
+                    $modelClass
+                )
             );
         }
 
         return new $config[$modelClass]($appends);
-    }
-
-    public static function getMaxPerPage(): string
-    {
-        return static::MAX_PER_PAGE;
     }
 }

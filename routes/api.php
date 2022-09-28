@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GetRoleListController;
@@ -15,9 +15,10 @@ use App\Http\Controllers\ProductFilterConfigurationController;
 Route::post('/users', [UserController::class, 'store']);
 
 Route::controller(AuthController::class)
+    ->prefix('/users/me')
     ->group(function () {
-        Route::patch('/users/me/verification', 'verify');
-        Route::post('/users/me/token', 'login');
+        Route::patch('/verification', 'verify');
+        Route::post('/token', 'login');
     });
 
 Route::middleware('auth:api')
@@ -27,28 +28,31 @@ Route::middleware('auth:api')
         Route::get('/roles', GetRoleListController::class);
 
         Route::controller(UserController::class)
+            ->prefix('/users')
             ->group(function () {
-                Route::get('/users', 'index');
-                Route::get('/users/{userId}', 'show');
-                Route::patch('/users/{user}', 'update');
-                Route::delete('/users/{user}', 'destroy');
+                Route::get('', 'index');
+                Route::get('/{userId}', 'show');
+                Route::patch('/{user}', 'update');
+                Route::delete('/{user}', 'destroy');
             });
 
         Route::controller(CategoryController::class)
-            ->group( function () {
-                Route::get('/categories', 'index');
-                Route::post('/categories', 'store');
-                Route::get('/categories/{categoryId}', 'show');
-                Route::patch('/categories/{category}', 'update');
-                Route::delete('/categories/{category}', 'destroy');
+            ->prefix('/categories')
+            ->group(function () {
+                Route::get('', 'index');
+                Route::post('', 'store');
+                Route::get('/{categoryId}', 'show');
+                Route::patch('/{category}', 'update');
+                Route::delete('/{category}', 'destroy');
             });
 
         Route::controller(ProductFieldGroupController::class)
+            ->prefix('/product-field-groups')
             ->group(function () {
-                Route::post('/product-field-groups', 'store');
-                Route::get('/product-field-groups', 'index');
-                Route::get('/product-field-groups/{groupId}', 'show');
-                Route::delete('/product-field-groups/{group}', 'destroy');
+                Route::post('', 'store');
+                Route::get('', 'index');
+                Route::get('/{groupId}', 'show');
+                Route::delete('/{group}', 'destroy');
             });
 
         Route::controller(ProductFieldController::class)
@@ -92,4 +96,3 @@ Route::middleware('auth:api')
                 Route::delete('/filter-values/{value}', 'destroy');
             });
     });
-
