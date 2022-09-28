@@ -29,11 +29,11 @@ use App\Models\ProductFilter\Exceptions\InvalidFilterTypeException;
  * @property int $category_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property Collection|iterable<int, ProductDetail>|null $details
- *                                                                 RELATIONS
+ * @property Collection&iterable<int, ProductDetail>|null $details
+ * RELATIONS
  * @property Category $category
  * @property ProductFilterType $type
- * @property Collection|iterable<int, ProductFilterValue>|null $values
+ * @property Collection&iterable<int, ProductFilterValue>|null $values
  * @property ProductField $field
  */
 final class ProductFilter extends BaseModel
@@ -100,18 +100,6 @@ final class ProductFilter extends BaseModel
             'id'
         );
     }
-
-    /***********************************************************************
-     *                                                                     *
-     *                               SCOPES                                *
-     *                                                                     *
-     **********************************************************************/
-
-    /***********************************************************************
-     *                                                                     *
-     *                               SETTERS                               *
-     *                                                                     *
-     **********************************************************************/
 
     /***********************************************************************
      *                                                                     *

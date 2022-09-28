@@ -12,6 +12,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 abstract class BasicAuth
 {
     private string $username;
+
     private string $password;
 
     abstract protected function getConfigPath(): string;

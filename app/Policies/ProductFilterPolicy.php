@@ -6,12 +6,14 @@ use App\Models\User\User;
 use App\Models\Role\RoleName;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class ProductFilterPolicy
+final class ProductFilterPolicy
 {
     use HandlesAuthorization;
 
     public const CREATE = 'create';
+
     public const UPDATE = 'update';
+
     public const DELETE = 'delete';
 
     public function create(User $user): bool

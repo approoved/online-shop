@@ -23,16 +23,14 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 
 class AuthServiceProvider extends ServiceProvider
 {
-    /**
-     * @var array<class-string, class-string>
-     */
+    /** @var array<class-string, class-string> */
     protected $policies = [
         Category::class => CategoryPolicy::class,
         User::class => UserPolicy::class,
         Role::class => RolePolicy::class,
         ProductFieldGroup::class => ProductFieldGroupPolicy::class,
         ProductField::class => ProductFieldPolicy::class,
-        Product::class =>ProductPolicy::class,
+        Product::class => ProductPolicy::class,
         ProductFilter::class => ProductFilterPolicy::class,
         ProductFilterValue::class => ProductFilterValuePolicy::class,
     ];

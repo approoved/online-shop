@@ -26,15 +26,7 @@ final class ProductFieldGroupController extends Controller
         $data = $request->validated();
 
         $group = new ProductFieldGroup();
-
-        try {
-            $group->fill($data)->save();
-        } catch (InvalidInputDataException $exception) {
-            throw new HttpException(
-                Response::HTTP_CONFLICT,
-                $exception->getMessage()
-            );
-        }
+        $group->fill($data)->save();
 
         return $this->transformToJson($group, status: Response::HTTP_CREATED);
     }

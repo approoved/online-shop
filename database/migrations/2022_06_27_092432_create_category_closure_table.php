@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('category_closure', function (Blueprint $table) {
             $table->id('closure_id');
 
-            $table->integer('ancestor', false, true);
-            $table->integer('descendant', false, true);
+            $table->unsignedBigInteger('ancestor', false);
+            $table->unsignedBigInteger('descendant', false);
             $table->integer('depth', false, true);
 
             $table->foreign('ancestor')

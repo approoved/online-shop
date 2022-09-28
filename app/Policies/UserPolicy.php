@@ -7,14 +7,18 @@ use App\Models\Role\RoleName;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class UserPolicy
+final class UserPolicy
 {
     use HandlesAuthorization;
 
     public const VIEW_ANY = 'viewAny';
+
     public const VIEW = 'view';
+
     public const UPDATE = 'update';
+
     public const UPDATE_ROLE = 'updateRole';
+
     public const DELETE = 'delete';
 
     /**
@@ -30,8 +34,8 @@ class UserPolicy
      */
     public function view(Authenticatable $authUser, User $user): bool
     {
-        return $authUser->id === $user->id ||
-            $authUser->hasRole(RoleName::Admin, RoleName::Manager);
+        return $authUser->id === $user->id
+            || $authUser->hasRole(RoleName::Admin, RoleName::Manager);
     }
 
     /**
@@ -47,8 +51,8 @@ class UserPolicy
      */
     public function updateRole(Authenticatable $authUser, User $user): bool
     {
-        return $authUser->hasRole(RoleName::Admin) &&
-            $authUser->id !== $user->id;
+        return $authUser->hasRole(RoleName::Admin)
+            && $authUser->id !== $user->id;
     }
 
     /**

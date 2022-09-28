@@ -29,10 +29,10 @@ use App\Services\Elasticsearch\Repositories\Product\ProductSearchRepository;
  * @property int $quantity
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *                              RELATIONS
+ * RELATIONS
  * @property Category $category
- * @property Collection|iterable<int, ProductField>|null $fields
- * @property Collection|iterable<int, ProductDetail>|null $details
+ * @property Collection&iterable<int, ProductField>|null $fields
+ * @property Collection&iterable<int, ProductDetail>|null $details
  */
 class Product extends BaseModel implements Searchable
 {
@@ -102,25 +102,13 @@ class Product extends BaseModel implements Searchable
 
     /***********************************************************************
      *                                                                     *
-     *                               SCOPES                                *
-     *                                                                     *
-     **********************************************************************/
-
-    /***********************************************************************
-     *                                                                     *
-     *                               SETTERS                               *
-     *                                                                     *
-     **********************************************************************/
-
-    /***********************************************************************
-     *                                                                     *
      *                               GETTERS                               *
      *                                                                     *
      **********************************************************************/
 
     protected function getShortDetailsAttribute(): array
     {
-        /** @var Collection|iterable<int, ProductDetail>|null $productDetails */
+        /** @var Collection&iterable<int, ProductDetail>|null $productDetails */
         $productDetails = $this->details()->with('field.type', 'field.group')->get();
 
         $result = [];

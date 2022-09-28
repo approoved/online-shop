@@ -29,7 +29,7 @@ class ReindexProduct extends Command
      * @throws ServerResponseException
      * @throws MissingParameterException
      */
-    public function handle()
+    public function handle(): void
     {
         $this->info('Reindexing all products. This might take a while...');
 
@@ -45,8 +45,8 @@ class ReindexProduct extends Command
         /** @var ProductField $field */
         foreach ($fields as $field) {
             $mappings[] = [
-                'field' => $field->getField(),
-                'type' => FieldTypeName::get($field->type->name)
+                'field' => $this->repository->getSearchField($field),
+                'type' => FieldTypeName::get($field->type->name),
             ];
         }
 

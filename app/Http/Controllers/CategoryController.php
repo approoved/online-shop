@@ -46,7 +46,7 @@ final class CategoryController extends Controller
             return response()->json($categories->toTree());
         }
 
-        /** @var Collection|iterable<int, Category> $categories */
+        /** @var Collection&iterable<int, Category> $categories */
         $categories = Category::getSearchQuery()
             ->paginate();
 

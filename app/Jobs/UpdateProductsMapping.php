@@ -35,8 +35,8 @@ class UpdateProductsMapping implements ShouldQueue
     public function handle(ProductSearchRepository $repository): void
     {
         $mapping = [
-            'field' => $this->field->getField(),
-            'type' => FieldTypeName::get($this->field->type->name)
+            'field' => $repository->getSearchField($this->field),
+            'type' => FieldTypeName::get($this->field->type->name),
         ];
 
         $repository->putMappings([$mapping]);
