@@ -6,6 +6,7 @@ use Illuminate\Support\Arr;
 use App\Models\Product\Product;
 use App\Models\Category\Category;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\ProductField\ProductField;
 use App\Services\Elasticsearch\Searchable;
 use App\Models\ProductFilter\ProductFilter;
 use App\Exceptions\InvalidInputDataException;
@@ -16,9 +17,14 @@ use Elastic\Elasticsearch\Exception\ServerResponseException;
 use App\Services\Elasticsearch\Repositories\BaseSearchRepository;
 use App\Services\Elasticsearch\Repositories\Product\Serializers\FilterRequestSerializer;
 
-class ProductSearchRepository extends BaseSearchRepository
+final class ProductSearchRepository extends BaseSearchRepository
 {
     public const ELASTIC_INDEX = 'products';
+
+    public function __construct(private readonly FilterRequestSerializer $serializer)
+    {
+        parent::__construct();
+    }
 
     /**
      * @throws InvalidAppConfigurationException
@@ -71,7 +77,7 @@ class ProductSearchRepository extends BaseSearchRepository
                         );
                     }
 
-                    $filters[] = FilterRequestSerializer::serialize($filter, $query);
+                    $filters[] = $this->serializer->serialize($filter, $query);
                 }
             }
         }
@@ -109,5 +115,10 @@ class ProductSearchRepository extends BaseSearchRepository
     public function getIndex(): string
     {
         return self::ELASTIC_INDEX;
+    }
+
+    public function getSearchField(ProductField $field): string
+    {
+        return sprintf('short_details.%s.%s', $field->group->name, $field->name);
     }
 }

@@ -28,8 +28,8 @@ use Franzose\ClosureTable\Extensions\Collection as FranzoseCollection;
  * @property Collection|null $children
  * @property Category|null $parent
  * @property Collection|null $products
- * @property Collection|iterable<int, ProductFilter>|null $filters
- * @property Collection|iterable<int, ProductField>|null $fields
+ * @property Collection&iterable<int, ProductFilter>|null $filters
+ * @property Collection&iterable<int, ProductField>|null $fields
  */
 class Category extends Entity
 {
@@ -109,24 +109,6 @@ class Category extends Entity
             ]
         )->distinct();
     }
-
-    /***********************************************************************
-     *                                                                     *
-     *                               SCOPES                                *
-     *                                                                     *
-     **********************************************************************/
-
-    /***********************************************************************
-     *                                                                     *
-     *                               SETTERS                               *
-     *                                                                     *
-     **********************************************************************/
-
-    /***********************************************************************
-     *                                                                     *
-     *                               GETTERS                               *
-     *                                                                     *
-     **********************************************************************/
 
     /***********************************************************************
      *                                                                     *

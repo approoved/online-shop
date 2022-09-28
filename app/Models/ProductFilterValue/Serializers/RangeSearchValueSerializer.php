@@ -8,7 +8,7 @@ use App\Models\ProductFilter\ProductFilter;
 use App\Exceptions\InvalidDataTypeException;
 use App\Exceptions\InvalidInputDataException;
 
-class RangeSearchValueSerializer
+final class RangeSearchValueSerializer
 {
     /**
      * @throws InvalidInputDataException

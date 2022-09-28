@@ -35,6 +35,10 @@ class User extends Authenticatable
     use HasApiTokens;
     use HasQueryBuilder;
 
+    public static array $requiredRelationsMatch = [];
+
+    public static array $allowedIncludes = ['role'];
+
     protected $fillable = [
         'first_name',
         'last_name',
@@ -46,10 +50,6 @@ class User extends Authenticatable
     ];
 
     protected $hidden = ['password', 'remember_token', 'token'];
-
-    public static array $requiredRelationsMatch = [];
-
-    public static array $allowedIncludes = ['role'];
 
     protected $casts = ['email_verified_at' => 'datetime'];
 
@@ -63,24 +63,6 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Role::class);
     }
-
-    /***********************************************************************
-     *                                                                     *
-     *                               SCOPES                                *
-     *                                                                     *
-     **********************************************************************/
-
-    /***********************************************************************
-     *                                                                     *
-     *                               SETTERS                               *
-     *                                                                     *
-     **********************************************************************/
-
-    /***********************************************************************
-     *                                                                     *
-     *                               GETTERS                               *
-     *                                                                     *
-     **********************************************************************/
 
     /***********************************************************************
      *                                                                     *

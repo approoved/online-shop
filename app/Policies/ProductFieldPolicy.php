@@ -6,7 +6,7 @@ use App\Models\User\User;
 use App\Models\Role\RoleName;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class ProductFieldPolicy
+final class ProductFieldPolicy
 {
     use HandlesAuthorization;
 

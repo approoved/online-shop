@@ -5,7 +5,7 @@ namespace App\Http\Transformers\ProductFilter\Serializers;
 use App\Models\ProductDetail\ProductDetail;
 use App\Models\ProductFilter\ProductFilter;
 
-class RuntimeProductFilterAggregationSerializer
+final class RuntimeProductFilterAggregationSerializer
 {
     public static function serialize(ProductFilter $filter): array
     {

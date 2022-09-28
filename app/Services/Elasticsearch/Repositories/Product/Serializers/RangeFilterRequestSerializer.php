@@ -5,13 +5,18 @@ namespace App\Services\Elasticsearch\Repositories\Product\Serializers;
 use App\Models\ProductFilter\ProductFilter;
 use App\Exceptions\ResourceNotFoundException;
 use App\Models\ProductFilterValue\ProductFilterValue;
+use App\Services\Elasticsearch\Repositories\Product\ProductSearchRepository;
 
-class RangeFilterRequestSerializer
+final class RangeFilterRequestSerializer
 {
+    public function __construct(private readonly ProductSearchRepository $repository)
+    {
+    }
+
     /**
      * @throws ResourceNotFoundException
      */
-    public static function serialize(ProductFilter $filter, array $query): array
+    public function serialize(ProductFilter $filter, array $query): array
     {
         $ranges = [];
 
@@ -34,7 +39,7 @@ class RangeFilterRequestSerializer
 
             $ranges[] = [
                 'range' => [
-                    $filter->field->getField() => $filterValue->search_value,
+                    $this->repository->getSearchField($filter->field) => $filterValue->search_value,
                 ],
             ];
         }

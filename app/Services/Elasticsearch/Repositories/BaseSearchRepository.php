@@ -20,6 +20,8 @@ abstract class BaseSearchRepository implements SearchRepository
 
     protected const MAX_RESULT_SIZE = 10000;
 
+    abstract public function getIndex(): string;
+
     /**
      * @throws AuthenticationException
      */
@@ -215,6 +217,4 @@ abstract class BaseSearchRepository implements SearchRepository
 
         return $this->elasticsearch->search($data)->asArray();
     }
-
-    abstract public function getIndex(): string;
 }
