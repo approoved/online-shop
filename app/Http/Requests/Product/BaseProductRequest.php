@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests\Product;
 
-use App\Rules\Uppercase;
-use App\Rules\ArrayWithStringIndices;
 use App\Http\Requests\BaseFormRequest;
 
 abstract class BaseProductRequest extends BaseFormRequest
@@ -13,32 +11,19 @@ abstract class BaseProductRequest extends BaseFormRequest
         $required = $isCreate ? 'required' : 'sometimes';
 
         return  [
-            'sku' => [
-                $required,
-                'string',
-                new Uppercase(),
-                'unique:products,sku',
-            ],
-            'name' => [
-                $required,
-                'string',
-            ],
-            'category' => [
-                $required,
-                'string',
-            ],
-            'price' => [
-                $required,
-                'numeric',
-                'min:0.01',
-            ],
-            'add_quantity' => [
-                'sometimes',
+            'sku' => [$required, 'string', 'unique:products,sku'],
+            'name' => [$required, 'string'],
+            'price' => [$required, 'numeric', 'min:0.01'],
+            'add_quantity' => ['sometimes', 'integer'],
+            'details' => ['sometimes'],
+            'details.*' => ['required_with:details', 'array'],
+            'details.*.value' => ['required_with:details'],
+            'details.*.product_field_id' => [
+                'required_with:details',
                 'integer',
-            ],
-            'details' => [
-                'sometimes',
-                new ArrayWithStringIndices(),
+                'numeric',
+                'bail',
+                'exists:product_fields,id',
             ],
         ];
     }

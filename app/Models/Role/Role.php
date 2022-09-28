@@ -3,29 +3,32 @@
 namespace App\Models\Role;
 
 use Carbon\Carbon;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * @property int id
- * @property string name
- * @property Carbon created_at
- * @property Carbon updated_at
- * @property Collection|iterable<int, User> users
+ * ATTRIBUTES
+ * @property int $id
+ * @property string $name
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ * RELATIONS
+ * @property Collection&iterable<int, User> users
  */
-class Role extends Model
+class Role extends BaseModel
 {
     use HasFactory;
 
-    /**
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-    ];
+    protected $fillable = ['name'];
+
+    /***********************************************************************
+     *                                                                     *
+     *                              RELATIONS                              *
+     *                                                                     *
+     **********************************************************************/
 
     public function users(): HasMany
     {

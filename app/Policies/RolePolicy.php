@@ -2,12 +2,12 @@
 
 namespace App\Policies;
 
-use App\Models\User;
+use App\Models\User\User;
 use App\Models\Role\RoleName;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class RolePolicy
+final class RolePolicy
 {
     use HandlesAuthorization;
 
@@ -18,6 +18,6 @@ class RolePolicy
      */
     public function viewAny(Authenticatable $user): bool
     {
-        return $user->hasRole(RoleName::admin);
+        return $user->hasRole(RoleName::Admin);
     }
 }

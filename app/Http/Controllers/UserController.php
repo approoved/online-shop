@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Role\Role;
+use App\Models\User\User;
 use Illuminate\Support\Str;
 use App\Policies\UserPolicy;
 use App\Models\Role\RoleName;
 use Illuminate\Support\Facades\Hash;
-use Spatie\QueryBuilder\QueryBuilder;
 use App\Notifications\EmailVerification;
-use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Requests\User\CreateUserRequest;
-use Symfony\Component\HttpFoundation\Response;
+use App\Http\Requests\User\UpdateUserRequest;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Auth\Access\AuthorizationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -26,7 +25,7 @@ final class UserController extends Controller
 
         /** @var Role $customerRole */
         $customerRole = Role::query()
-            ->firstWhere('name', '=', RoleName::customer->value());
+            ->firstWhere('name', RoleName::Customer->value());
 
         $data['password'] = bcrypt($data['password']);
         $data['token'] = Str::random(72);
@@ -38,7 +37,7 @@ final class UserController extends Controller
         $notification = new EmailVerification($user);
         $user->notify($notification);
 
-        return response()->json($user, Response::HTTP_CREATED);
+        return $this->transformToJson($user, status: Response::HTTP_CREATED);
     }
 
     /**
@@ -48,22 +47,25 @@ final class UserController extends Controller
     {
         $this->authorize(UserPolicy::VIEW_ANY, User::class);
 
-        $users = QueryBuilder::for(User::class)
-            ->allowedFilters(['role.name', 'email'])
-            ->allowedIncludes('role')
-            ->paginate(50);
+        $users = User::getSearchQuery()
+            ->paginate();
 
-        return response()->json($users);
+        return $this->transformToJson($users);
     }
 
     /**
      * @throws AuthorizationException
      */
-    public function show(User $user): JsonResponse
+    public function show(int $userId): JsonResponse
     {
+        /** @var User $user */
+        $user = User::getSearchQuery()
+            ->where('id', $userId)
+            ->firstOrFail();
+
         $this->authorize(UserPolicy::VIEW, $user);
 
-        return response()->json($user);
+        return $this->transformToJson($user);
     }
 
     /**
@@ -72,7 +74,7 @@ final class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
         $data = $request->validated();
-//
+
         if (isset($data['role'])) {
             $this->authorize(UserPolicy::UPDATE_ROLE, $user);
 
@@ -84,7 +86,11 @@ final class UserController extends Controller
             $user->role_id = $role->id;
             $user->save();
 
-            return response()->json($user->load('role'));
+            $user = User::getSearchQuery()
+                ->where('id', $user->id)
+                ->first();
+
+            return $this->transformToJson($user);
         }
 
         $this->authorize(UserPolicy::UPDATE, $user);
@@ -95,12 +101,11 @@ final class UserController extends Controller
         }
 
         if (isset($data['new_password'])) {
-            if (! (isset($data['password']) &&
-                Hash::check($data['password'], $user->password))) {
-                    throw new HttpException(
-                        Response::HTTP_NOT_FOUND,
-                        'Invalid current password'
-                    );
+            if (! Hash::check($data['password'], $user->password)) {
+                throw new HttpException(
+                    Response::HTTP_NOT_FOUND,
+                    'Invalid current password'
+                );
             }
 
             $data['password'] = bcrypt($data['new_password']);
@@ -113,7 +118,7 @@ final class UserController extends Controller
             $user->notify($notification);
         }
 
-        return response()->json($user);
+        return $this->transformToJson($user);
     }
 
     /**
@@ -124,15 +129,18 @@ final class UserController extends Controller
     {
         $this->authorize(UserPolicy::DELETE, $user);
 
-        if ($user->hasRole(RoleName::customer)) {
-            $user->delete();
-
-            return response()->noContent();
+        if (! $user->hasRole(RoleName::Customer)) {
+            throw new HttpException(
+                Response::HTTP_CONFLICT,
+                sprintf(
+                    'Unable to delete profile with %s role',
+                    $user->role->name
+                )
+            );
         }
 
-        throw new HttpException(
-            Response::HTTP_CONFLICT,
-            'Unable to delete profile with ' . $user->role->name . ' role'
-        );
+        $user->delete();
+
+        return response()->noContent();
     }
 }

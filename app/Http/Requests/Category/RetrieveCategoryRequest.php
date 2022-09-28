@@ -9,9 +9,8 @@ final class RetrieveCategoryRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'include' => [
-                'string',
-            ],
+            'serialize' => ['sometimes', 'string'],
+            'append' => ['sometimes', 'string'],
         ];
     }
 }

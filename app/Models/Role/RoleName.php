@@ -2,13 +2,13 @@
 
 namespace App\Models\Role;
 
-use App\Src\Enum\BaseEnum;
+use App\Services\Enum\BaseEnum;
 
 enum RoleName
 {
     use BaseEnum;
 
-    case customer;
-    case manager;
-    case admin;
+    case Customer;
+    case Manager;
+    case Admin;
 }

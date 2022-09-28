@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('sku')->unique();
             $table->string('name');
-            $table->integer('category_id');
+            $table->unsignedBigInteger('category_id');
             $table->decimal('price', 20);
             $table->integer('quantity')->default(0);
             $table->json('details')->nullable();
