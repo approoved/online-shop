@@ -31,7 +31,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * RELATIONS
  * @property FieldType $type
  * @property ProductFieldGroup $group
- * @property Collection|iterable<int, Product>|null $products
+ * @property Collection&iterable<int, Product>|null $products
  */
 class ProductField extends BaseModel
 {

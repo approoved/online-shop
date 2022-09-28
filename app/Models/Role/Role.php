@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * RELATIONS
- * @property Collection|iterable<int, User> users
+ * @property Collection&iterable<int, User> users
  */
 class Role extends BaseModel
 {
