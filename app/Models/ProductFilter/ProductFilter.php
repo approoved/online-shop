@@ -41,15 +41,9 @@ final class ProductFilter extends BaseModel
     use HasFactory;
     use HasRelationships;
 
-    protected $fillable = [
-        'category_id',
-        'name',
-        'product_field_id',
-        'product_filter_type_id',
-    ];
-
     public static array $allowedIncludes = [
         'values',
+        'field',
         'field.type',
         'type',
         'category',
@@ -57,6 +51,13 @@ final class ProductFilter extends BaseModel
 
     public static array $requiredRelationsMatch = [
         'aggregated-values' => ['type', 'values', 'category.products.details'],
+    ];
+
+    protected $fillable = [
+        'category_id',
+        'name',
+        'product_field_id',
+        'product_filter_type_id',
     ];
 
     /***********************************************************************

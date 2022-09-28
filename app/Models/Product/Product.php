@@ -40,14 +40,6 @@ class Product extends BaseModel implements Searchable
     use SearchableTrait;
     use HasRelationships;
 
-    protected $fillable = [
-        'sku',
-        'name',
-        'category_id',
-        'price',
-        'quantity',
-    ];
-
     public static array $allowedIncludes = [
         'category',
         'details',
@@ -58,6 +50,14 @@ class Product extends BaseModel implements Searchable
         'details' => ['details.field.type'],
         'details.field' => ['details.field.type'],
         'short-details' => ['details.field.type', 'details.field.group'],
+    ];
+
+    protected $fillable = [
+        'sku',
+        'name',
+        'category_id',
+        'price',
+        'quantity',
     ];
 
     /***********************************************************************

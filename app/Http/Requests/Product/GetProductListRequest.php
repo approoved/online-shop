@@ -4,13 +4,17 @@ namespace App\Http\Requests\Product;
 
 use App\Http\Requests\BaseFormRequest;
 use App\Http\Controllers\ProductController;
+use App\Http\Requests\ValidationFields\IncludeRules;
+use App\Models\Product\Product;
 
-final class RetrieveProductRequest extends BaseFormRequest
+final class GetProductListRequest extends BaseFormRequest
 {
     public function rules(): array
     {
-        return [
-            'append' => ['sometimes', 'string'],
+        return array_merge(
+            IncludeRules::getRules(Product::class),
+            [
+            'append' => ['sometimes', 'string', 'values_in:short-details'],
             'query' => ['sometimes', 'string'],
             'category_id' => [
                 'sometimes',
@@ -29,6 +33,7 @@ final class RetrieveProductRequest extends BaseFormRequest
                 'max:' . ProductController::getMaxPerPage(),
             ],
             'page' => ['sometimes', 'integer', 'numeric', 'min:1'],
-        ];
+            ]
+        );
     }
 }

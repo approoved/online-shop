@@ -19,6 +19,7 @@
         "laravel/tinker": "^2.7",
         "php-http/curl-client": "^2.2",
         "predis/predis": "^1.1",
+        "rakutentech/laravel-request-docs": "^1.25",
         "spatie/laravel-fractal": "^6.0",
         "spatie/laravel-query-builder": "^5.0",
         "staudenmeir/eloquent-has-many-deep": "^1.15"

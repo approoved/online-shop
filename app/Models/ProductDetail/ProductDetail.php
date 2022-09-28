@@ -24,6 +24,10 @@ class ProductDetail extends BaseModel
 {
     use HasFactory;
 
+    public static array $allowedIncludes = [
+        'field',
+    ];
+
     protected $fillable = [
         'value',
         'product_id',
@@ -32,10 +36,6 @@ class ProductDetail extends BaseModel
 
     protected $with = [
         'field.type',
-    ];
-
-    public static array $allowedIncludes = [
-        'field',
     ];
 
     /***********************************************************************

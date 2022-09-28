@@ -7,10 +7,11 @@ use App\Models\Category\Category;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Auth\Access\AuthorizationException;
+use App\Http\Requests\Category\GetCategoryRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Http\Requests\Category\CreateCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
-use App\Http\Requests\Category\RetrieveCategoryRequest;
+use App\Http\Requests\Category\GetCategoryListRequest;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Franzose\ClosureTable\Extensions\Collection as ClosureTableCollection;
 
@@ -35,7 +36,7 @@ final class CategoryController extends Controller
         return $this->transformToJson($category, status: Response::HTTP_CREATED);
     }
 
-    public function index(RetrieveCategoryRequest $request): JsonResponse
+    public function index(GetCategoryListRequest $request): JsonResponse
     {
         $data = $request->validated();
 
@@ -53,7 +54,7 @@ final class CategoryController extends Controller
         return $this->transformToJson($categories);
     }
 
-    public function show(RetrieveCategoryRequest $request, int $categoryId): JsonResponse
+    public function show(GetCategoryRequest $request, int $categoryId): JsonResponse
     {
         $data = $request->validated();
 
@@ -89,7 +90,6 @@ final class CategoryController extends Controller
 
     /**
      * @throws AuthorizationException
-     * @throws HttpException
      */
     public function destroy(Category $category): Response
     {
