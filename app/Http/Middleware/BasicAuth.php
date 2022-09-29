@@ -3,8 +3,8 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use RuntimeException;
 use Illuminate\Http\Request;
-use http\Exception\RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Illuminate\Contracts\Container\BindingResolutionException;
