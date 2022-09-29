@@ -6,7 +6,6 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
-        "ext-http": "*",
         "curl/curl": "^2.3",
         "doctrine/dbal": "^3.4",
         "elasticsearch/elasticsearch": "^8.3",
@@ -22,10 +21,10 @@
         "rakutentech/laravel-request-docs": "^1.25",
         "spatie/laravel-fractal": "^6.0",
         "spatie/laravel-query-builder": "^5.0",
-        "staudenmeir/eloquent-has-many-deep": "^1.15"
+        "staudenmeir/eloquent-has-many-deep": "^1.15",
+        "fakerphp/faker": "^1.9.1"
     },
     "require-dev": {
-        "fakerphp/faker": "^1.9.1",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^6.1",
